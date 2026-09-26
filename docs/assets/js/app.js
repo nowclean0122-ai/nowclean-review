@@ -11,8 +11,8 @@ const write = s => { try { localStorage.setItem(storeKey, JSON.stringify(s)); } 
 async function main() {
   if (!/^[a-z0-9]{6,12}$/.test(j)) { root.innerHTML = '<section><h1>링크가 올바르지 않아요</h1><p class="sub">문자로 받으신 링크를 다시 눌러주세요.</p></section>'; return; }
   const flow = (await loadJson('flow.json')).afterCleaning;
-  let job = null;
-  try { const r = await get({ action: 'job', j }); if (r.ok) job = r; } catch (e) {}
+  // 서버(구글)가 처음엔 몇 초 걸려서 기다리지 않고 뒤에서 받아둔다 — 후기 버튼 화면에서만 필요
+  const jobPromise = get({ action: 'job', j }).then(r => (r.ok ? r : null)).catch(() => null);
 
   const state = read();
   log(j, state.opened ? 'reopen' : 'open', flow[state.step || 0]);
@@ -26,7 +26,7 @@ async function main() {
     current = flow[idx];
     state.step = idx; write(state);
     const mod = await import(`./steps/${current}.js`);
-    const ctx = { j, job, state, save: patch => { Object.assign(state, patch); write(state); }, next: () => show(idx + 1) };
+    const ctx = { j, jobPromise, state, save: patch => { Object.assign(state, patch); write(state); }, next: () => show(idx + 1) };
     const el = await mod.render(ctx);
     root.replaceChildren(el);
     document.getElementById('progress').textContent = `${idx + 1} / ${flow.length}`;

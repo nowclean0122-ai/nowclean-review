@@ -7,13 +7,15 @@ export async function appConfig() {
 export async function loadJson(name) {
   return (await fetch(new URL(`../../../config/${name}`, import.meta.url))).json();
 }
+// 15초 넘게 답이 없으면 멈춰 있지 않고 오류로 끝낸다
+const timed = () => ({ signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined });
 export async function get(params) {
   const { apiUrl } = await appConfig();
   const url = apiUrl + '?' + new URLSearchParams(params);
-  return (await fetch(url)).json();
+  return (await fetch(url, timed())).json();
 }
 export async function post(body) {
   const { apiUrl } = await appConfig();
-  const res = await fetch(apiUrl, { method: 'POST', body: JSON.stringify(body) });
+  const res = await fetch(apiUrl, { method: 'POST', body: JSON.stringify(body), ...timed() });
   return res.json();
 }

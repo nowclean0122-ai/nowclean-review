@@ -32,7 +32,7 @@ function ensureJob() {
 }
 
 async function login() {
-  $('loginMsg').textContent = '확인 중…';
+  $('loginMsg').textContent = '확인 중… (처음엔 5초쯤 걸려요)';
   try {
     const r = await post({ action: 'login', pin });
     if (!r.ok) throw new Error(r.error);
@@ -42,7 +42,7 @@ async function login() {
     $('main').hidden = false;
     $('acct').textContent = settings.account
       ? `${settings.bank} ${settings.account} (${settings.holder})`
-      : '⚠️ 계좌가 비어 있어요 — 구글 시트 "설정" 탭에 입력';
+      : '아직 없음 — 문자에 [계좌번호를 입력해 주세요]로 나가요 (구글 시트 "설정" 탭에서 입력)';
     loadList();
   } catch (e) {
     localStorage.removeItem('nc_pin');
@@ -77,10 +77,9 @@ async function main() {
   $('amount').addEventListener('input', () => { const n = amountValue(); $('amount').value = n ? fmt(n) : ''; });
 
   $('copyAccount').addEventListener('click', async () => {
-    if (!settings.account) return toast('⚠️ 설정 탭에 계좌번호가 없어요');
     if (!amountValue()) return toast('금액을 먼저 넣어주세요');
     ensureJob();
-    const text = fill(messages.account, { '계좌번호': settings.account, '은행': settings.bank, '예금주': settings.holder, '금액': fmt(amountValue()) });
+    const text = fill(messages.account, { '계좌번호': settings.account || '[계좌번호를 입력해 주세요]', '은행': settings.bank || '[은행]', '예금주': settings.holder || '[예금주]', '금액': fmt(amountValue()) });
     if (await copyText(text)) { toast('✔ ② 계좌 문자 복사됨'); $('copyAccount').classList.add('done'); }
   });
 

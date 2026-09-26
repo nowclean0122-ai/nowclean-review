@@ -5,7 +5,8 @@ import { log } from '../core/log.js';
 
 export async function render(ctx) {
   const platforms = await loadJson('platforms.json');
-  const links = ctx.job?.links || {};
+  const job = await ctx.jobPromise;
+  const links = job?.links || {};
   const buttons = platforms
     .filter(p => p.enabled && links[p.key])
     .map(p => {
