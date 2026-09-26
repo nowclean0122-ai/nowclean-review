@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>나우클린 관리자</title>
+<link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+<div class="top"><b>나우클린 관리자</b><button class="link" id="logout">로그아웃</button></div>
+<main>
+  <section id="login">
+    <h1>PIN 입력</h1>
+    <p class="sub">구글 시트 "설정" 탭의 관리자PIN</p>
+    <form id="pinForm"><input id="pin" inputmode="numeric" autocomplete="off" maxlength="8"><button class="btn primary" type="submit">들어가기</button></form>
+    <p class="sub" id="loginMsg"></p>
+  </section>
+
+  <section id="main" hidden>
+    <h1>새 작업</h1>
+    <div class="field">
+      <div class="label">잔금 금액 (카드 결제면 비워도 돼요)</div>
+      <input id="amount" inputmode="numeric" placeholder="250,000" autocomplete="off">
+      <div class="label" style="margin-top:8px">입금 계좌: <span id="acct"></span></div>
+      <div class="label">작업 이름: <span id="jobname">(첫 복사 때 지금 시각으로 저장)</span></div>
+    </div>
+    <p class="sub"><span class="step-n">①</span>전후 사진은 문자앱에서 바로 첨부해 보내기</p>
+    <button class="btn" id="copyAccount" type="button"><span class="step-n">②</span>📋 계좌 문자 복사</button>
+    <button class="btn primary" id="copyReview" type="button"><span class="step-n">③</span>📋 리뷰 문자 복사</button>
+    <button class="btn" id="reset" type="button" hidden>✚ 다음 작업 시작 (지우기)</button>
+
+    <h1 style="margin-top:26px">최근 작업</h1>
+    <div id="list"><p class="sub">불러오는 중…</p></div>
+  </section>
+</main>
+<script type="module" src="../assets/js/admin.js"></script>
+</body>
+</html>

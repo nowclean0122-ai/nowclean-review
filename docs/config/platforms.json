@@ -1,0 +1,6 @@
+[
+  { "key": "daangn", "label": "🥕 당근에 후기 남기기", "style": "carrot", "enabled": true },
+  { "key": "insta", "label": "📷 인스타 후기 게시물에 댓글", "style": "plain", "enabled": true },
+  { "key": "kakao", "label": "💬 카카오맵에 후기 남기기", "style": "plain", "enabled": false },
+  { "key": "naver", "label": "N 네이버 예약 리뷰", "style": "plain", "enabled": false }
+]

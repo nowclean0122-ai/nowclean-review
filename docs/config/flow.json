@@ -1,0 +1,4 @@
+{
+  "afterCleaning": ["survey", "review-links", "thanks"],
+  "_note": "나중에 초안 기능을 넣을 때: [\"survey\", \"draft\", \"review-links\", \"thanks\"] + assets/js/steps/draft.js"
+}
