@@ -38,7 +38,7 @@ function accountDefault() {
 
 function freshJob() {
   // 링크의 "만든 시각"은 지금 정해 두고, 처음 복사할 때 다시 현재 시각으로 맞춤
-  cur = { token: newToken(), created: Date.now(), saved: false, name: '', amount: 0, staff: readJson(LAST_STAFF, []), accountEdited: false, reviewEdited: false };
+  cur = { token: newToken(), created: Date.now(), saved: false, name: '', amount: 0, staff: [], accountEdited: false, reviewEdited: false };
   saveCur();
 }
 
@@ -96,12 +96,14 @@ function addStaff(input) {
 /* ---------- 지금 작업 ---------- */
 
 function renderCard() {
-  $('jobname').textContent = cur.saved ? cur.name : (cur.staff.length ? cur.staff.join('·') + ' · ' : '') + '새 작업 (아직 저장 전)';
+  const min = Math.max(0, Math.round((Date.now() - cur.created) / 60000));
+  $('jobname').textContent = cur.saved ? cur.name : '';
   $('jobhint').textContent = cur.saved
-    ? `저장된 작업이에요 (${Math.max(0, Math.round((Date.now() - cur.created) / 60000))}분 전). 같은 고객에게 다시 복사해도 새 작업이 안 생겨요. 새 고객이면 꼭 아래 "다음 작업 시작"부터!`
-    : '문자를 처음 복사하는 순간 저장돼요. 여러 번 복사해도 작업은 1개예요.';
-  $('jobcard').classList.toggle('saved', cur.saved);
+    ? `지금 고객: ${cur.name} (${min}분 전) · 다음 고객이면 맨 아래 "다음 고객 시작"`
+    : '위에서부터 차례로 누르면 끝나요';
+  ['s1', 's2', 's3'].forEach(id => $(id).classList.toggle('done', !!(cur.steps || {})[id]));
 }
+const markStep = id => { cur.steps = Object.assign({}, cur.steps, { [id]: true }); saveCur(); renderCard(); };
 
 function render() {
   $('amount').value = cur.amount ? fmt(cur.amount) : '';
@@ -220,25 +222,25 @@ async function main() {
 
   $('copyAccount').addEventListener('click', async () => {
     if (!okToReuse()) return;
-    if (await copyText($('accountText').value)) { ensureSaved(); toast('✔ ② 계좌 문자 복사됨'); $('copyAccount').classList.add('done'); }
+    if (await copyText($('accountText').value)) { ensureSaved(); toast('✔ 복사됐어요 — 문자방에 붙여넣고 보내세요'); markStep('s2'); }
   });
   $('copyReview').addEventListener('click', async () => {
     if (!okToReuse()) return;
     if (!cur.saved) { cur.created = Date.now(); cur.reviewEdited = false; saveCur(); render(); }   // 링크 시각 = 처음 보내는 순간
     const text = $('reviewText').value;
     if (!text.includes(cur.token)) { cur.reviewEdited = false; saveCur(); render(); return toast('⚠️ 링크 줄이 지워져서 문구를 다시 불러왔어요'); }
-    if (!cur.saved && !cur.staff.length && !confirm('같이 간 사람을 안 골랐어요. 그대로 보낼까요?')) return;
-    if (await copyText(text)) { ensureSaved(); toast('✔ ③ 리뷰 문자 복사됨'); $('copyReview').classList.add('done'); }
+    if (await copyText(text)) { ensureSaved(); toast('✔ 복사됐어요 — 문자방에 붙여넣고 보내세요'); markStep('s3'); }
   });
+  $('photoDone').addEventListener('click', () => { markStep('s1'); toast('✔ 좋아요! 다음은 2번'); });
   $('preview').addEventListener('click', () => {
     if (!cur.saved) return toast('문자를 한 번 복사해서 작업을 저장한 뒤에 볼 수 있어요');
     window.open(reviewLink() + '&preview=1', '_blank');
   });
   $('nextJob').addEventListener('click', () => {
-    if (cur.saved && !confirm(`"${cur.name}" 작업을 끝내고 새 작업을 시작할까요?`)) return;
+    if (cur.saved && !confirm(`"${cur.name}" 고객은 끝내고 다음 고객을 시작할까요?`)) return;
     freshJob(); render(); loadList();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast('✚ 새 작업 준비됐어요 — 같이 간 사람·금액부터');
+    toast('✚ 새 고객 준비됐어요 — 1번부터');
   });
   $('logout').addEventListener('click', () => { localStorage.removeItem('nc2_in'); location.reload(); });
   $('refresh').addEventListener('click', () => { loadList(); toast('목록 새로 불러오는 중'); });

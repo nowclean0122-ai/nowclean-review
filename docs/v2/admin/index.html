@@ -21,44 +21,51 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
   </section>
 
   <section id="main" hidden>
-    <div class="jobcard" id="jobcard">
-      <div class="label">지금 작업</div>
-      <div id="jobname" class="jobname">새 작업 (아직 저장 전)</div>
-      <div class="sub" id="jobhint">문자를 처음 복사하는 순간 저장돼요. 여러 번 복사해도 작업은 1개예요.</div>
+    <h1 class="big-title">청소 끝! 고객님께 문자 3통 🙌</h1>
+    <p class="sub" id="jobhint">위에서부터 차례로 누르면 끝나요</p>
+    <div id="jobcard" hidden><span id="jobname"></span></div>
+
+    <!-- ① 사진 -->
+    <div class="stepcard" id="s1">
+      <div class="stephead"><span class="stepno">1</span> 전후 사진 보내기</div>
+      <p class="stepdesc">고객님 <b>문자방</b>에서 📎 → 갤러리 → 전후 사진 4~6장 → 전송</p>
+      <button class="btn" id="photoDone" type="button">✔ 사진 보냈어요</button>
     </div>
 
-    <div class="field">
-      <div class="label"><b>오늘 같이 간 사람</b> (여러 명 눌러도 돼요)</div>
-      <div class="chips staffchips" id="staffChips"></div>
+    <!-- ② 금액 + 계좌 -->
+    <div class="stepcard" id="s2">
+      <div class="stephead"><span class="stepno">2</span> 잔금 넣고 계좌 문자 보내기</div>
+      <input id="amount" inputmode="numeric" placeholder="잔금 금액 (예: 250,000)" autocomplete="off">
+      <button class="btn big" id="copyAccount" type="button">📋 계좌 문자 복사</button>
+      <p class="stepdesc">→ 문자방에 <b>길게 눌러 붙여넣기 → 전송</b> · 카드 결제면 건너뛰기</p>
+      <details class="peek"><summary>문구 보기 · 고치기</summary><textarea id="accountText" rows="3"></textarea><p class="sub small" id="acctNote"></p></details>
     </div>
 
-    <div class="field">
-      <div class="label">잔금 금액 (카드 결제면 비워도 돼요)</div>
-      <input id="amount" inputmode="numeric" placeholder="250,000" autocomplete="off">
+    <!-- ③ 리뷰 -->
+    <div class="stepcard" id="s3">
+      <div class="stephead"><span class="stepno">3</span> 리뷰 부탁 문자 보내기</div>
+      <button class="btn primary big" id="copyReview" type="button">📋 리뷰 문자 복사</button>
+      <p class="stepdesc">→ 같은 문자방에 <b>붙여넣기 → 전송</b></p>
+      <details class="peek"><summary>문구 보기 · 고치기 (링크 줄은 지우지 마세요)</summary><textarea id="reviewText" rows="8"></textarea></details>
     </div>
 
-    <p class="sub"><b>①</b> 전후 사진은 문자앱에서 바로 첨부해 보내기</p>
-
-    <div class="field">
-      <div class="label"><b>②</b> 계좌 문자 — 고쳐서 보내도 돼요</div>
-      <textarea id="accountText" rows="3"></textarea>
-      <button class="btn" id="copyAccount" type="button">📋 계좌 문자 복사</button>
-      <p class="sub small" id="acctNote"></p>
+    <!-- 한마디 -->
+    <div class="stepcard say-card">
+      <div class="stephead">🗣️ 고객님께 한마디</div>
+      <p class="stepdesc">"방금 사진이랑 계좌, 설문 링크 보내드렸어요. 사진은 하나 눌러서 <b>전체 저장</b> 해두시면 후기에 같이 올리실 수 있어요. 1분 설문이랑 짧은 후기 남겨주시면 정말 큰 힘이 됩니다!"</p>
     </div>
 
-    <div class="field">
-      <div class="label"><b>③</b> 리뷰 문자 — 고쳐서 보내도 돼요 (링크 줄은 지우지 마세요)</div>
-      <textarea id="reviewText" rows="9"></textarea>
-      <button class="btn primary" id="copyReview" type="button">📋 리뷰 문자 복사</button>
-    </div>
-
+    <button class="btn next" id="nextJob" type="button">✚ 다음 고객 시작 (새 현장)</button>
     <button class="btn" id="preview" type="button">👀 고객 화면 미리보기 (기록 안 남음)</button>
-    <button class="btn next" id="nextJob" type="button">✚ 이 작업 끝 · 다음 작업 시작</button>
 
-    <h1 style="margin-top:26px">최근 작업 <button class="link" id="refresh" type="button">↻ 새로고침</button></h1>
+    <details class="peek" id="staffBox"><summary>👥 같이 간 사람 기록하기 (선택)</summary>
+      <div class="chips staffchips" id="staffChips"></div>
+    </details>
+
+    <h2 class="list-title">최근 작업 <button class="link" id="refresh" type="button">↻ 새로고침</button></h2>
     <div class="chips" id="staffFilter"></div>
     <div class="sumbar" id="sumbar"></div>
-    <p class="sub">고객 설문 답·후기 버튼 클릭이 작업마다 보여요 (몇 분 늦게 반영). 전체 기록은 <a id="sheetLink" target="_blank" rel="noopener">구글 시트</a> · 테스트 작업은 🗑</p>
+    <p class="sub">고객 설문 답·후기 버튼 클릭이 작업마다 보여요 (몇 분 늦게 반영) · 전체 기록 <a id="sheetLink" target="_blank" rel="noopener">구글 시트</a> · 잘못 만든 작업은 🗑</p>
     <div id="list"><p class="sub">불러오는 중…</p></div>
   </section>
 </main>
