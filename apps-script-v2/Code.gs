@@ -93,35 +93,72 @@ function setupV2() {
 /** 설정값 다시 보기 */
 function showConfig() { Logger.log(PropertiesService.getScriptProperties().getProperty('CONFIG')); }
 
-/* ---------- 설문지 제출될 때마다 (트리거) ---------- */
+/* ---------- 설문지 제출 처리 ----------
+ * 제출될 때(onSubmitV2) + 1분마다(processV2) 둘 다 "원본"에서 아직 처리 안 한 줄을 차례로 처리한다.
+ * 한꺼번에 많이 들어와도 서로 기다리다 실패하지 않고, 놓친 줄은 다음 번에 따라잡는다.
+ */
 
-function onSubmitV2(e) {
-  const v = {};
-  e.response.getItemResponses().forEach(r => { v[r.getItem().getTitle()] = String(r.getResponse() || '').trim(); });
-  const kind = v['종류'];
-  const token = v['토큰'];
-  if (!/^[a-z0-9]{6,12}$/.test(token)) return;
-  if (ADMIN_KINDS.indexOf(kind) >= 0 && v['키'] !== PropertiesService.getScriptProperties().getProperty('KEY')) return;   // 관리자 동작은 키가 맞아야
+function onSubmitV2() { ensureMinuteTrigger_(); processV2(); }
 
+let ROW_TIME = null;   // 처리 중인 줄이 실제로 제출된 시각 (밀린 줄도 원래 시각으로 기록)
+
+function processV2() {
+  ensureMinuteTrigger_();
   const lock = LockService.getScriptLock();
-  lock.waitLock(20000);
+  if (!lock.tryLock(1000)) return;            // 이미 누가 처리 중이면 이번엔 넘김 (다음 번에 따라잡음)
   try {
-    if (kind === '작업') createJob_(token, v);
-    else if (kind === '수정') updateJob_(token, v);
-    else if (kind === '삭제') { const hit = jobRow_(token); if (hit) sheet_(TAB.job).getRange(hit.row, 5).setValue('삭제'); }
-    else if (kind === '직원') addStaff_(v['담당직원']);
-    else if (kind === '기록') logEvent_(token, v);
-    else if (kind === '설문') saveSurvey_(token, v);
-    else return;
+    const raw = SpreadsheetApp.openById(sheetId_()).getSheetByName(TAB.raw) || findRawSheet_();
+    if (!raw) return;
+    const rows = raw.getDataRange().getValues();
+    const head = rows[0].map(h => String(h).trim());
+    const props = PropertiesService.getScriptProperties();
+    let done = Number(props.getProperty('RAW_DONE') || 1);   // 처리한 마지막 줄 번호(1 = 머리글)
+    if (done >= rows.length) return;
+    const key = props.getProperty('KEY');
+    for (let i = done; i < rows.length; i++) {
+      const v = {};
+      FIELDS.forEach(t => { const c = head.indexOf(t); v[t] = c >= 0 ? String(rows[i][c] || '').trim() : ''; });
+      ROW_TIME = rows[i][0] instanceof Date ? rows[i][0] : new Date();
+      try { handle_(v, key); } catch (err) { console.error('줄 ' + (i + 1) + ': ' + err); }
+      done = i + 1;
+      props.setProperty('RAW_DONE', String(done));
+    }
     rebuildPublic_();
   } finally {
     lock.releaseLock();
   }
 }
 
+function handle_(v, key) {
+  const kind = v['종류'];
+  const token = v['토큰'];
+  if (kind === '직원') { if (v['키'] === key) addStaff_(v['담당직원']); return; }
+  if (!/^[a-z0-9]{6,12}$/.test(token)) return;
+  if (ADMIN_KINDS.indexOf(kind) >= 0 && v['키'] !== key) return;   // 관리자 동작은 키가 맞아야
+  if (kind === '작업') createJob_(token, v);
+  else if (kind === '수정') updateJob_(token, v);
+  else if (kind === '삭제') { const hit = jobRow_(token); if (hit) sheet_(TAB.job).getRange(hit.row, 5).setValue('삭제'); }
+  else if (kind === '기록') logEvent_(token, v);
+  else if (kind === '설문') saveSurvey_(token, v);
+}
+
+function findRawSheet_() {
+  const ss = SpreadsheetApp.openById(sheetId_());
+  const s = ss.getSheets().find(x => x.getFormUrl && x.getFormUrl());
+  if (s && s.getName() !== TAB.raw) s.setName(TAB.raw);
+  return s;
+}
+
+function ensureMinuteTrigger_() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('MINUTE_OK')) return;
+  if (!ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'processV2')) ScriptApp.newTrigger('processV2').timeBased().everyMinutes(1).create();
+  props.setProperty('MINUTE_OK', '1');
+}
+
 function createJob_(token, v) {
   if (jobRow_(token)) return;
-  const now = new Date();
+  const now = ROW_TIME || new Date();
   const staff = v['담당직원'].slice(0, 80);
   const name = (v['작업이름'] || ((staff ? staff + ' · ' : '') + jobName_(now))).slice(0, 100);
   sheet_(TAB.job).appendRow([now, name, Number(v['금액']) || '', token, '', staff]);
@@ -245,7 +282,7 @@ function findJob_(token) {
   return hit ? { name: hit.r[1], token, created: new Date(hit.r[0]), status: String(hit.r[4] || ''), staff: String(hit.r[5] || '') } : null;
 }
 function appendLog_(job, ev, step, device) {
-  const now = new Date();
+  const now = ROW_TIME || new Date();
   sheet_(TAB.log).appendRow([now, job.name, job.token, ev, step, elapsed_(job.created, now), device, job.staff || '']);
 }
 function jobName_(d) {
