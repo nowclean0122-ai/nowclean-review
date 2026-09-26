@@ -31,11 +31,15 @@ export async function render(ctx) {
       return h('div', {}, a, p.note ? h('p', { class: 'sub note' }, p.note) : null);
     });
 
+  const back = h('button', { class: 'link', type: 'button' }, '← 설문으로');
+  back.addEventListener('click', () => { moved = true; document.removeEventListener('visibilitychange', onVisible); ctx.back(); });
+
   const done = h('button', { class: 'btn', type: 'button' }, '다 했어요 →');
   done.addEventListener('click', () => goNext('done'));
 
   log(ctx.j, 'review_view', 'review-links');
   return h('section', {},
+    back,
     h('h1', {}, '짧은 후기 부탁드려요 🙏'),
     h('p', { class: 'sub' }, '한두 줄이면 충분해요. 저장해 두신 사진도 같이 올려주시면 더 좋아요.'),
     buttons.length ? buttons : h('p', { class: 'sub' }, '(후기 링크 준비 중이에요)'),

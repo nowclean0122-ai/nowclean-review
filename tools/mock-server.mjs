@@ -17,7 +17,9 @@ function api(body) {
   switch (body.action) {
     case 'login': return body.pin === '1234' ? { ok: true, settings } : { ok: false, error: 'PIN이 맞지 않아요' };
     case 'createJob': jobs.push({ token: body.token, name: new Date().toLocaleString('ko-KR'), amount: body.amount }); logs.push([body.token, 'job_created']); return { ok: true, name: jobs.at(-1).name };
-    case 'listJobs': return { ok: true, jobs: jobs.slice().reverse().map(j => { const ev = logs.filter(l => l[0] === j.token).map(l => l[1]); return { ...j, stage: ev.at(-1), clicks: { daangn: ev.includes('click_daangn'), insta: ev.includes('click_insta') } }; }) };
+    case 'updateJob': { const x = jobs.find(j => j.token === body.token); if (x) x.amount = body.amount; return { ok: !!x }; }
+    case 'deleteJob': { const x = jobs.find(j => j.token === body.token); if (x) x.deleted = true; return { ok: !!x }; }
+    case 'listJobs': return { ok: true, jobs: jobs.filter(j => !j.deleted).slice().reverse().map(j => { const ev = logs.filter(l => l[0] === j.token).map(l => l[1]); return { ...j, stage: ev.at(-1), clicks: { daangn: ev.includes('click_daangn'), insta: ev.includes('click_insta') } }; }) };
     case 'log': if (!job) return { ok: false }; logs.push([body.j, body.ev]); console.log('LOG', body.ev, body.step, body.device); return { ok: true };
     case 'survey': if (!job) return { ok: false }; surveys.push(body.answers); logs.push([body.j, 'survey_submit']); console.log('SURVEY', JSON.stringify(body.answers)); return { ok: true };
   }

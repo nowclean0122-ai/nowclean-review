@@ -21,7 +21,7 @@ const EVENT_LABEL = {
   job_created: '작업 생성', open: '링크 열람', reopen: '다시 열람',
   survey_view: '설문 화면', survey_start: '설문 시작', survey_submit: '설문 제출',
   review_view: '후기 화면', click_daangn: '🥕 당근 클릭', click_insta: '📷 인스타 클릭',
-  done: '다 했어요', auto_thanks: '돌아와서 자동 감사', thanks_view: '감사 화면', leave: '나감', 'return': '돌아옴',
+  done: '다 했어요', survey_skip: '설문 건너뜀', back: '뒤로 가기', auto_thanks: '돌아와서 자동 감사', thanks_view: '감사 화면', leave: '나감', 'return': '돌아옴',
 };
 
 function doGet(e) {
@@ -46,17 +46,27 @@ function migrate_() {
   props.setProperty('MIG_INSTA', '1');
 }
 
+function migrateStatus_() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('MIG_STATUS')) return;
+  sheet_(TAB.job).getRange(1, 5).setValue('상태');
+  props.setProperty('MIG_STATUS', '1');
+}
+
 function doPost(e) {
   let body = {};
   try { body = JSON.parse(e.postData.contents || '{}'); } catch (err) { return json_({ ok: false, error: 'bad json' }); }
   try {
     ensureTrigger_();
+    migrateStatus_();
     switch (body.action) {
       case 'log': return json_(logEvent_(body));
       case 'survey': return json_(saveSurvey_(body));
       case 'login': return json_(login_(body));
       case 'createJob': return json_(createJob_(body));
       case 'listJobs': return json_(listJobs_(body));
+      case 'updateJob': return json_(updateJob_(body));
+      case 'deleteJob': return json_(deleteJob_(body));
       default: return json_({ ok: false, error: 'unknown action' });
     }
   } catch (err) {
@@ -124,7 +134,7 @@ function createJob_(b) {
 
 function listJobs_(b) {
   checkPin_(b.pin);
-  const jobs = sheet_(TAB.job).getDataRange().getValues().slice(1).slice(-30).reverse();
+  const jobs = sheet_(TAB.job).getDataRange().getValues().slice(1).filter(r => r[4] !== '삭제').slice(-30).reverse();
   const logs = sheet_(TAB.log).getDataRange().getValues().slice(1);
   const byToken = {};
   logs.forEach(r => { (byToken[r[2]] = byToken[r[2]] || []).push(r[3]); });
@@ -137,13 +147,38 @@ function listJobs_(b) {
   };
 }
 
+function jobRow_(token) {
+  const rows = sheet_(TAB.job).getDataRange().getValues();
+  for (let i = rows.length - 1; i >= 1; i--) if (rows[i][3] === token) return i + 1;
+  return 0;
+}
+
+// 작업을 만든 뒤 금액을 고친 경우
+function updateJob_(b) {
+  checkPin_(b.pin);
+  const row = jobRow_(String(b.token || ''));
+  if (!row) return { ok: false, error: 'no job' };
+  sheet_(TAB.job).getRange(row, 3).setValue(Number(b.amount) || '');
+  return { ok: true };
+}
+
+// 테스트·실수로 만든 작업 지우기 — 줄은 남기고 상태만 "삭제" (기록은 보존)
+function deleteJob_(b) {
+  checkPin_(b.pin);
+  const row = jobRow_(String(b.token || ''));
+  if (!row) return { ok: false, error: 'no job' };
+  sheet_(TAB.job).getRange(row, 5).setValue('삭제');
+  return { ok: true };
+}
+
 /* ---------- 하루 요약 메일 (매일 21시) ---------- */
 
 function dailyDigest() {
   const props = PropertiesService.getScriptProperties();
   const since = Number(props.getProperty('LAST_DIGEST') || 0);
   const now = Date.now();
-  const rows = sheet_(TAB.log).getDataRange().getValues().slice(1).filter(r => new Date(r[0]).getTime() > since);
+  const deleted = new Set(sheet_(TAB.job).getDataRange().getValues().filter(r => r[4] === '삭제').map(r => r[3]));
+  const rows = sheet_(TAB.log).getDataRange().getValues().slice(1).filter(r => new Date(r[0]).getTime() > since && !deleted.has(r[2]));
   props.setProperty('LAST_DIGEST', String(now));
   if (!rows.length) return;
 
@@ -191,7 +226,7 @@ function sheetId_() {
   const ss = SpreadsheetApp.create('나우클린 리뷰퍼널 DB');
   const first = ss.getSheets()[0];
   first.setName(TAB.job);
-  first.appendRow(['생성 시각', '작업 이름', '금액', '토큰']);
+  first.appendRow(['생성 시각', '작업 이름', '금액', '토큰', '상태']);
   ss.insertSheet(TAB.log).appendRow(['시각', '작업 이름', '토큰', '이벤트', '화면', '청소 후 경과', '기기']);
   ss.insertSheet(TAB.survey).appendRow(['시각', '작업 이름', '토큰', '청소 종류', '깨끗해진 곳', '좋았던 점']);
   const st = ss.insertSheet(TAB.settings);

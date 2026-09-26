@@ -2,11 +2,20 @@
 import { get, loadJson } from './core/api.js';
 import { log } from './core/log.js';
 
-const j = new URLSearchParams(location.search).get('j') || '';
+const params = new URLSearchParams(location.search);
+const j = params.get('j') || '';
 const root = document.getElementById('app');
 const storeKey = 'nc_' + j;
 const read = () => { try { return JSON.parse(localStorage.getItem(storeKey) || '{}'); } catch (e) { return {}; } };
 const write = s => { try { localStorage.setItem(storeKey, JSON.stringify(s)); } catch (e) {} };
+
+// 테스트용: 주소 끝에 &reset=1 → 이 폰에 저장된 진행 상태를 지우고 처음부터
+if (params.get('reset') || params.get('preview')) {
+  try { localStorage.removeItem(storeKey); } catch (e) {}
+  params.delete('reset');
+  if (params.get('preview')) document.title = '미리보기 · ' + document.title;
+  history.replaceState(null, '', location.pathname + '?' + params);
+}
 
 async function main() {
   if (!/^[a-z0-9]{6,12}$/.test(j)) { root.innerHTML = '<section><h1>링크가 올바르지 않아요</h1><p class="sub">문자로 받으신 링크를 다시 눌러주세요.</p></section>'; return; }
@@ -22,11 +31,17 @@ async function main() {
   document.addEventListener('visibilitychange', () => log(j, document.hidden ? 'leave' : 'return', current));
 
   const show = async i => {
-    const idx = Math.min(i, flow.length - 1);
+    const idx = Math.max(0, Math.min(i, flow.length - 1));
     current = flow[idx];
     state.step = idx; write(state);
     const mod = await import(`./steps/${current}.js`);
-    const ctx = { j, jobPromise, state, save: patch => { Object.assign(state, patch); write(state); }, next: () => show(idx + 1) };
+    const ctx = {
+      j, jobPromise, state,
+      save: patch => { Object.assign(state, patch); write(state); },
+      next: () => show(idx + 1),
+      back: () => { log(j, 'back', current); show(idx - 1); },
+      isFirst: idx === 0,
+    };
     const el = await mod.render(ctx);
     root.replaceChildren(el);
     document.getElementById('progress').textContent = `${idx + 1} / ${flow.length}`;

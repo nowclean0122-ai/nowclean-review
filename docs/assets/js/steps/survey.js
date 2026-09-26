@@ -1,7 +1,7 @@
 // 1단계: 설문 — 답은 구글 시트 "설문" 탭에 저장
 import { h } from '../core/dom.js';
 import { loadJson, post } from '../core/api.js';
-import { log, device } from '../core/log.js';
+import { log, device, isPreview } from '../core/log.js';
 
 export async function render(ctx) {
   const cfg = await loadJson('survey.json');
@@ -28,10 +28,13 @@ export async function render(ctx) {
   const next = h('button', { class: 'btn primary', type: 'button' }, '다음 →');
   next.addEventListener('click', () => {
     next.disabled = true;
-    post({ action: 'survey', j: ctx.j, answers, device: device() }).catch(() => {});   // 기다리지 않음
+    if (!isPreview) post({ action: 'survey', j: ctx.j, answers, device: device() }).catch(() => {});   // 기다리지 않음
     ctx.next();
   });
 
+  const skip = h('button', { class: 'link center', type: 'button' }, '설문 건너뛰기 →');
+  skip.addEventListener('click', () => { log(ctx.j, 'survey_skip', 'survey'); ctx.next(); });
+
   log(ctx.j, 'survey_view', 'survey');
-  return h('section', {}, h('h1', {}, cfg.title), h('p', { class: 'sub' }, '해당하는 것만 톡톡 눌러주세요 · 1분'), blocks, next);
+  return h('section', {}, h('h1', {}, cfg.title), h('p', { class: 'sub' }, '해당하는 것만 톡톡 눌러주세요 · 1분'), blocks, next, skip);
 }
