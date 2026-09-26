@@ -8,7 +8,7 @@ export async function render(ctx) {
   const L = ctx.log || ((ev, step) => log(ctx.j, ev, step));
   L('thanks_view', 'thanks');
   const p = h('p', { class: 'thanks-body' });
-  p.innerHTML = '바쁘신데 시간 내주셔서<br><b>진심으로 감사드려요.</b><br><br>남겨주신 설문과 후기가<br>저희 같은 작은 업체에<br><b>정말 너무너무 큰 힘</b>이 됩니다.<br><br>새집에서 행복한 일만<br>가득하시길 바랄게요 🏠';
+  p.innerHTML = '남겨주신 설문과 후기는<br><b>저희에게 정말 큰 도움</b>이 됩니다.<br><br>앞으로도 더 꼼꼼하게,<br>믿고 맡기실 수 있도록<br><b>열심히 노력하겠습니다.</b><br><br>새집에서 행복한 일만<br>가득하시길 바랄게요 🏠';
 
   const pj = await loadJson('platforms.json');
   const extras = (Array.isArray(pj) ? pj : pj.buttons).filter(x => x.placement === 'thanks' && x.enabled && x.url);

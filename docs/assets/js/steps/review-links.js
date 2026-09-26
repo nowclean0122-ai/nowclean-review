@@ -23,17 +23,18 @@ export async function render(ctx) {
     L(ev, 'review-links');
     ctx.next();
   };
+  // 당근·인스타에 다녀오면 화면은 그대로 두고: 그 버튼에 ✔ + 아래에 감사 인사 (다른 버튼도 이어서 누를 수 있게)
+  const thanksBox = h('div', { class: 'inline-thanks', hidden: true });
+  thanksBox.innerHTML = '<b>남겨주셔서 정말 감사합니다 🙏</b><br>다른 곳에도 남겨주시면 더 큰 힘이 돼요.<br>다 하셨으면 아래 <b>다 했어요</b>를 눌러주세요.';
   const onVisible = () => {
     if (document.hidden) { if (clicked) leftAt = Date.now(); return; }
     if (!(clicked && leftAt && Date.now() - leftAt > 2000)) return;   // 2초 넘게 다녀왔으면 하고 온 것으로 봄
     visited.add(lastKey);
     const el = document.querySelector('[data-key="' + lastKey + '"]');
-    if (el && !el.textContent.startsWith('✔')) el.textContent = '✔ ' + el.textContent;
-    // 같은 줄(당근 후기 + 단골)에 아직 안 한 게 있으면 기다림 → 둘 다 하면 감사 화면
-    const p = platforms.find(x => x.key === lastKey);
-    const pending = p && p.row ? platforms.filter(x => x.row === p.row && x.enabled && !visited.has(x.key)) : [];
+    if (el) el.classList.add('did');
+    thanksBox.hidden = false;
+    L('return_from_' + lastKey, 'review-links');
     clicked = false; leftAt = 0;
-    if (!pending.length) goNext('auto_thanks');
   };
   document.addEventListener('visibilitychange', onVisible);
 
@@ -70,5 +71,6 @@ export async function render(ctx) {
     h('h1', {}, '짧은 후기 부탁드려요 🙏'),
     h('p', { class: 'sub' }, '한두 줄이면 충분해요. 저장해 두신 사진도 같이 올려주시면 더 좋아요.'),
     buttons,
+    thanksBox,
     h('div', { class: 'gap' }), done);
 }
