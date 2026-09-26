@@ -48,3 +48,10 @@ select{width:100%;font-size:17px;padding:10px;border:1.5px solid var(--line);bor
 .sumbar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:10px 0;font-size:14px}
 .ans{font-size:13px;color:#374151;margin-top:4px;line-height:1.5}
 .ans b{color:#1450b8;font-weight:700}
+.btn.kakao{background:#fee500;border-color:#fee500;color:#191600}
+.btn.soon{background:#f3f4f6;color:#9ca3af;border-style:dashed;cursor:default;font-size:15px}
+.staffchips .chip{font-size:15px;padding:8px 14px}
+.addrow{display:flex;gap:6px;margin-top:8px}
+.addrow input{font-size:15px;text-align:left;padding:8px 10px}
+.addrow button{white-space:nowrap;width:auto;margin:0;padding:8px 12px;font-size:14px}
+.chip:disabled{opacity:.75;cursor:default}

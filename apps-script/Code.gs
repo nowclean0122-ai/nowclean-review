@@ -1,18 +1,18 @@
 /**
  * 나우클린 리뷰 퍼널 — 서버 (Google Apps Script 웹앱)
- * 저장: 구글 시트(작업/기록/설문/설정/팀) · 메일: 이 계정 Gmail로 자기 자신에게
+ * 저장: 구글 시트(작업/기록/설문/설정/직원) · 메일: 이 계정 Gmail로 자기 자신에게
  * 화면(GitHub Pages)에서 GET/POST로 호출한다.
  *
- * 로그인: 팀 PIN(팀 탭) → 그 팀 작업만 / 관리자PIN(설정 탭) → 대표, 전체 팀
+ * 로그인: 관리자PIN(설정 탭) 하나로 모두 같은 화면 (예전 팀 PIN도 들어가짐)
+ * 작업마다 담당 직원을 여러 명 고름 (직원 탭) · 고객 링크는 만든 뒤 N일(설정 "링크유효일", 기본 60) 지나거나 삭제하면 닫힘
  * 시트 열 구성
- *   작업: 생성 시각 | 작업 이름 | 금액 | 토큰 | 상태 | 팀
- *   기록: 시각 | 작업 이름 | 토큰 | 이벤트 | 화면 | 청소 후 경과 | 기기 | 팀
- *   설문: 첫 제출 | 작업 이름 | 토큰 | 청소 종류 | 깨끗해진 곳 | 좋았던 점 | 팀 | 수정 횟수 | 마지막 수정   ← 링크 1개당 1줄
- *   팀:   팀 이름 | PIN | 메모
+ *   작업: 생성 시각 | 작업 이름 | 금액 | 토큰 | 상태 | 담당 직원
+ *   기록: 시각 | 작업 이름 | 토큰 | 이벤트 | 화면 | 청소 후 경과 | 기기 | 담당 직원
+ *   설문: 첫 제출 | 작업 이름 | 토큰 | 청소 종류 | 깨끗해진 곳 | 좋았던 점 | 담당 직원 | 수정 횟수 | 마지막 수정   ← 링크 1개당 1줄
+ *   직원: 이름 | 메모          (팀 탭은 예전 것 — PIN만 로그인에 계속 인정)
  */
 
-const TAB = { job: '작업', log: '기록', survey: '설문', settings: '설정', team: '팀' };
-const OWNER = '대표';
+const TAB = { job: '작업', log: '기록', survey: '설문', settings: '설정', team: '팀', staff: '직원' };
 
 // 퍼널 단계 순서 — 목록·요약 메일에서 "어디까지 갔나" 계산에 사용
 const STAGES = [
@@ -28,7 +28,7 @@ const STAGES = [
 const EVENT_LABEL = {
   job_created: '작업 생성', open: '링크 열람', reopen: '다시 열람',
   survey_view: '설문 화면', survey_start: '설문 시작', survey_submit: '설문 제출', survey_update: '설문 수정',
-  review_view: '후기 화면', click_daangn: '🥕 당근 클릭', click_insta: '📷 인스타 클릭',
+  review_view: '후기 화면', click_daangn: '🥕 당근 클릭', click_insta: '📷 인스타 클릭', click_kakao: '💬 카카오 클릭',
   done: '다 했어요', survey_skip: '설문 건너뜀', back: '뒤로 가기', auto_thanks: '돌아와서 자동 감사',
   thanks_view: '감사 화면', leave: '나감', 'return': '돌아옴',
 };
@@ -58,6 +58,7 @@ function doPost(e) {
       case 'listJobs': return json_(listJobs_(body));
       case 'updateJob': return json_(updateJob_(body));
       case 'deleteJob': return json_(deleteJob_(body));
+      case 'addStaff': return json_(addStaff_(body));
       default: return json_({ ok: false, error: 'unknown action' });
     }
   } catch (err) {
@@ -67,16 +68,20 @@ function doPost(e) {
 
 /* ---------- 고객 쪽 ---------- */
 
+function linkDays_() { return Number(settings_()['링크유효일']) || 60; }
+function isClosed_(job) { return job.status === '삭제' || (Date.now() - job.created.getTime()) > linkDays_() * 86400000; }
+
 function publicJob_(token) {
   const job = findJob_(token);
   if (!job) return { ok: false, error: 'no job' };
+  if (isClosed_(job)) return { ok: false, error: 'closed' };
   const s = settings_();
   return { ok: true, name: job.name, links: { daangn: s['당근후기링크'] || '', insta: s['인스타후기링크'] || '', kakao: s['카카오맵링크'] || '', naver: s['네이버리뷰링크'] || '' } };
 }
 
 function logEvent_(b) {
   const job = findJob_(b.j);
-  if (!job) return { ok: false, error: 'no job' };        // 등록된 작업 토큰만 받음
+  if (!job || isClosed_(job)) return { ok: false, error: 'no job' };   // 등록된·열린 작업만 받음
   const cache = CacheService.getScriptCache();
   const key = 'n_' + b.j;
   const n = Number(cache.get(key) || 0);
@@ -89,7 +94,7 @@ function logEvent_(b) {
 // 설문은 링크(작업) 1개당 1줄 — 같은 고객이 다시 제출하면 새 줄이 아니라 그 줄을 고친다
 function saveSurvey_(b) {
   const job = findJob_(b.j);
-  if (!job) return { ok: false, error: 'no job' };
+  if (!job || isClosed_(job)) return { ok: false, error: 'no job' };
   const a = b.answers || {};
   const join = v => (Array.isArray(v) ? v : [v]).filter(Boolean).map(String).join(', ').slice(0, 500);
   const lock = LockService.getScriptLock();
@@ -116,51 +121,59 @@ function saveSurvey_(b) {
 
 /* ---------- 관리자 쪽 ---------- */
 
-// PIN → { role: 'owner'|'team', team }
+// PIN 확인 — 관리자PIN 또는 예전 팀 PIN이면 모두 같은 화면
 function auth_(pin) {
   pin = String(pin || '').trim();
   if (!pin) throw new Error('PIN을 넣어주세요');
-  const s = settings_();
-  if (pin === String(s['관리자PIN'])) return { role: 'owner', team: OWNER };
-  const t = teams_().find(x => x.pin === pin);
-  if (t) return { role: 'team', team: t.name };
+  if (pin === String(settings_()['관리자PIN'])) return true;
+  if (teams_().some(x => x.pin === pin)) return true;
   throw new Error('PIN이 맞지 않아요');
 }
 
-function canTouch_(who, jobTeam) { return who.role === 'owner' || who.team === jobTeam; }
-
 function login_(b) {
-  const who = auth_(b.pin);
+  auth_(b.pin);
   const s = settings_();
   return {
-    ok: true, role: who.role, team: who.team,
-    teams: who.role === 'owner' ? teams_().map(t => t.name) : [],
+    ok: true, staff: staff_(),
     daangnUrl: s['당근후기링크'] || '',
     settings: { bank: s['은행'] || '', account: s['계좌번호'] || '', holder: s['예금주'] || '' },
   };
 }
 
+function staff_() {
+  const sh = sheet_(TAB.staff);
+  return sh ? sh.getDataRange().getValues().slice(1).map(r => String(r[0]).trim()).filter(Boolean) : [];
+}
+
+// 관리자 화면에서 새 직원 이름 추가
+function addStaff_(b) {
+  auth_(b.pin);
+  const name = String(b.name || '').trim().slice(0, 20);
+  if (!name) return { ok: false, error: '이름을 넣어주세요' };
+  if (staff_().indexOf(name) < 0) sheet_(TAB.staff).appendRow([name, '']);
+  return { ok: true, staff: staff_() };
+}
+
 function createJob_(b) {
-  const who = auth_(b.pin);
+  auth_(b.pin);
   const token = String(b.token || '');
   if (!/^[a-z0-9]{6,12}$/.test(token)) throw new Error('bad token');
   if (findJob_(token)) return { ok: true, dup: true, name: findJob_(token).name };
-  let team = who.team;
-  if (who.role === 'owner' && b.team && teams_().some(t => t.name === b.team)) team = b.team;   // 대표는 팀을 골라서 만들 수 있음
+  const staff = (Array.isArray(b.staff) ? b.staff : []).map(s => String(s).trim().slice(0, 20)).filter(Boolean).join('·');
   const now = new Date();
-  const name = team + ' · ' + jobName_(now);
+  const name = (staff ? staff + ' · ' : '') + jobName_(now);
   const amount = Number(b.amount) || '';
-  sheet_(TAB.job).appendRow([now, name, amount, token, '', team]);
+  sheet_(TAB.job).appendRow([now, name, amount, token, '', staff]);
   CacheService.getScriptCache().remove('job_' + token);
-  appendLog_({ name, token, created: now, team }, 'job_created', 'admin', '');
-  return { ok: true, name, team };
+  appendLog_({ name, token, created: now, team: staff }, 'job_created', 'admin', '');
+  return { ok: true, name };
 }
 
 function listJobs_(b) {
-  const who = auth_(b.pin);
-  const filterTeam = who.role === 'owner' ? (b.team || '') : who.team;
+  auth_(b.pin);
+  const who = String(b.staff || '');   // 직원 이름으로 거르기 ('' = 전체)
   const jobs = sheet_(TAB.job).getDataRange().getValues().slice(1)
-    .filter(r => r[4] !== '삭제' && (!filterTeam || teamOf_(r[5]) === filterTeam))
+    .filter(r => r[4] !== '삭제' && (!who || String(r[5]).split('·').indexOf(who) >= 0))
     .slice(-40).reverse();
   const tokens = new Set(jobs.map(r => r[3]));
   const byToken = {};
@@ -171,18 +184,20 @@ function listJobs_(b) {
   sheet_(TAB.survey).getDataRange().getValues().slice(1).forEach(r => {
     if (tokens.has(r[2])) surveys[r[2]] = { type: r[3], clean: r[4], good: r[5], edits: Number(r[7] || 0) };
   });
+  const days = linkDays_();
   const list = jobs.map(r => {
     const evs = byToken[r[3]] || [];
     return {
-      name: r[1], amount: r[2], token: r[3], team: teamOf_(r[5]),
+      name: r[1], amount: r[2], token: r[3], staff: String(r[5] || ''),
       stage: stageOf_(evs), opened: evs.includes('open'),
-      clicks: { daangn: evs.includes('click_daangn'), insta: evs.includes('click_insta') },
+      clicks: { daangn: evs.includes('click_daangn'), insta: evs.includes('click_insta'), kakao: evs.includes('click_kakao') },
       survey: surveys[r[3]] || null,
+      closed: (Date.now() - new Date(r[0]).getTime()) > days * 86400000,
     };
   });
   const sum = { jobs: list.length, opened: 0, survey: 0, daangn: 0, insta: 0 };
   list.forEach(j => { if (j.opened) sum.opened++; if (j.survey) sum.survey++; if (j.clicks.daangn) sum.daangn++; if (j.clicks.insta) sum.insta++; });
-  return { ok: true, jobs: list, sum, team: filterTeam || '전체' };
+  return { ok: true, jobs: list, sum, who: who || '전체', staff: staff_() };
 }
 
 function jobRow_(token) {
@@ -193,19 +208,20 @@ function jobRow_(token) {
 
 // 작업을 만든 뒤 금액을 고친 경우
 function updateJob_(b) {
-  const who = auth_(b.pin);
+  auth_(b.pin);
   const hit = jobRow_(String(b.token || ''));
-  if (!hit || !canTouch_(who, hit.team)) return { ok: false, error: 'no job' };
+  if (!hit) return { ok: false, error: 'no job' };
   sheet_(TAB.job).getRange(hit.row, 3).setValue(Number(b.amount) || '');
   return { ok: true };
 }
 
 // 테스트·실수로 만든 작업 지우기 — 줄은 남기고 상태만 "삭제" (기록은 보존)
 function deleteJob_(b) {
-  const who = auth_(b.pin);
+  auth_(b.pin);
   const hit = jobRow_(String(b.token || ''));
-  if (!hit || !canTouch_(who, hit.team)) return { ok: false, error: 'no job' };
+  if (!hit) return { ok: false, error: 'no job' };
   sheet_(TAB.job).getRange(hit.row, 5).setValue('삭제');
+  CacheService.getScriptCache().remove('job_' + String(b.token));
   return { ok: true };
 }
 
@@ -271,7 +287,7 @@ function sheetId_() {
   const ss = SpreadsheetApp.create('나우클린 리뷰퍼널 DB');
   const first = ss.getSheets()[0];
   first.setName(TAB.job);
-  first.appendRow(['생성 시각', '작업 이름', '금액', '토큰', '상태', '팀']);
+  first.appendRow(['생성 시각', '작업 이름', '금액', '토큰', '상태', '담당 직원']);
   ss.insertSheet(TAB.log).appendRow(['시각', '작업 이름', '토큰', '이벤트', '화면', '청소 후 경과', '기기', '팀']);
   ss.insertSheet(TAB.survey).appendRow(['첫 제출', '작업 이름', '토큰', '청소 종류', '깨끗해진 곳', '좋았던 점', '팀', '수정 횟수', '마지막 수정']);
   const st = ss.insertSheet(TAB.settings);
@@ -295,16 +311,24 @@ function sheetId_() {
 // 예전 모양의 시트를 새 열 구성·팀 탭으로 맞춤 (한 번만)
 function migrate_() {
   const props = PropertiesService.getScriptProperties();
-  if (props.getProperty('SCHEMA') === '2') return;
+  if (props.getProperty('SCHEMA') === '3') return;
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    if (props.getProperty('SCHEMA') === '2') return;
+    if (props.getProperty('SCHEMA') === '3') return;
     const ss = SpreadsheetApp.openById(sheetId_());
-    ss.getSheetByName(TAB.job).getRange(1, 5, 1, 2).setValues([['상태', '팀']]);
-    ss.getSheetByName(TAB.log).getRange(1, 8).setValue('팀');
+    if (!ss.getSheetByName(TAB.staff)) {
+      const sf = ss.insertSheet(TAB.staff);
+      sf.getRange(1, 1, 1, 2).setValues([['이름', '메모']]);
+      sf.setFrozenRows(1);
+      sf.getRange(1, 4).setValue('관리자 화면의 "＋ 이름 추가"로 넣거나 여기에 한 줄씩 적으면 돼요. 그만둔 직원은 줄을 지우면 목록에서 빠져요.');
+    }
+    const st0 = ss.getSheetByName(TAB.settings);
+    if (!st0.getDataRange().getValues().some(r => r[0] === '링크유효일')) st0.appendRow(['링크유효일', 60, '고객 링크가 열려 있는 날수 (작업 만든 날부터)']);
+    ss.getSheetByName(TAB.job).getRange(1, 5, 1, 2).setValues([['상태', '담당 직원']]);
+    ss.getSheetByName(TAB.log).getRange(1, 8).setValue('담당 직원');
     ss.getSheetByName(TAB.survey).getRange(1, 1).setValue('첫 제출');
-    ss.getSheetByName(TAB.survey).getRange(1, 7, 1, 3).setValues([['팀', '수정 횟수', '마지막 수정']]);
+    ss.getSheetByName(TAB.survey).getRange(1, 7, 1, 3).setValues([['담당 직원', '수정 횟수', '마지막 수정']]);
     if (!ss.getSheetByName(TAB.team)) {
       const t = ss.insertSheet(TAB.team);
       const used = [String(settings_()['관리자PIN'])];
@@ -321,7 +345,7 @@ function migrate_() {
       if (r[0] === '인스타후기링크' && String(r[1]).indexOf('/p/') < 0) st.getRange(i + 1, 2).setValue('https://www.instagram.com/p/DdqqWnkEyxt/');
     });
     CacheService.getScriptCache().removeAll(['settings', 'teams']);
-    props.setProperty('SCHEMA', '2');
+    props.setProperty('SCHEMA', '3');
   } finally {
     lock.releaseLock();
   }
@@ -359,7 +383,7 @@ function findJob_(token) {
   const rows = sheet_(TAB.job).getDataRange().getValues();
   for (let i = rows.length - 1; i >= 1; i--) {
     if (rows[i][3] === token) {
-      const j = { name: rows[i][1], token, created: new Date(rows[i][0]), team: teamOf_(rows[i][5]) };
+      const j = { name: rows[i][1], token, created: new Date(rows[i][0]), team: String(rows[i][5] || ''), status: String(rows[i][4] || '') };
       cache.put('job_' + token, JSON.stringify(j), 21600);
       return j;
     }

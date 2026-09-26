@@ -1,27 +1,10 @@
 [
-  {
-    "key": "daangn",
-    "label": "🥕 당근에 후기 남기기",
-    "style": "carrot",
-    "enabled": true
-  },
-  {
-    "key": "insta",
-    "label": "📷 인스타 팔로우하고 후기 댓글 남기기",
-    "style": "plain",
-    "enabled": true,
-    "note": "팔로우도 해주시면 저희한테 정말 큰 힘이 돼요 💙"
-  },
-  {
-    "key": "kakao",
-    "label": "💬 카카오맵에 후기 남기기",
-    "style": "plain",
-    "enabled": false
-  },
-  {
-    "key": "naver",
-    "label": "N 네이버 예약 리뷰",
-    "style": "plain",
-    "enabled": false
-  }
+  { "key": "daangn", "label": "🥕 당근에 후기 남기기", "style": "carrot", "enabled": true,
+    "url": "https://www.daangn.com/kr/local-profile/wkyp8ke12i96/" },
+  { "key": "kakao", "label": "💬 카카오맵에 후기 남기기", "style": "kakao", "enabled": true,
+    "url": "https://map.kakao.com/link/search/천안역", "_note": "임시: 디자인 확인용(천안역). 카카오맵 장소 등록 후 시트 설정 탭 '카카오맵링크'에 넣으면 그걸로 바뀜" },
+  { "key": "insta", "label": "📷 인스타 팔로우하고 후기 댓글 남기기", "style": "plain", "enabled": true,
+    "url": "https://www.instagram.com/p/DdqqWnkEyxt/", "note": "팔로우도 해주시면 저희한테 정말 큰 힘이 돼요 💙" },
+  { "key": "naver", "label": "N 네이버 예약 리뷰", "style": "plain", "enabled": false, "showSoon": true,
+    "url": "" }
 ]
