@@ -45,6 +45,7 @@ function freshJob() {
 /* ---------- 같이 간 사람 ---------- */
 
 function renderStaff() {
+  if (!document.getElementById('staffChips')) return;   // 같이 간 사람 기록은 화면에서 뺌 (9/26)
   const chosen = new Set(cur.staff);
   $('staffChips').replaceChildren(...staffList.map(name => {
     const b = document.createElement('button');

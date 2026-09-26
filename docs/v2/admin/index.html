@@ -36,17 +36,21 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
     <div class="stepcard" id="s2">
       <div class="stephead"><span class="stepno">2</span> 잔금 넣고 계좌 문자 보내기</div>
       <input id="amount" inputmode="numeric" placeholder="잔금 금액 (예: 250,000)" autocomplete="off">
+      <div class="copylabel">이 문구가 복사돼요 (고쳐도 돼요)</div>
+      <textarea id="accountText" rows="3"></textarea>
+      <p class="sub small" id="acctNote"></p>
       <button class="btn big" id="copyAccount" type="button">📋 계좌 문자 복사</button>
       <p class="stepdesc">→ 문자방에 <b>길게 눌러 붙여넣기 → 전송</b> · 카드 결제면 건너뛰기</p>
-      <details class="peek"><summary>문구 보기 · 고치기</summary><textarea id="accountText" rows="3"></textarea><p class="sub small" id="acctNote"></p></details>
+      
     </div>
 
     <!-- ③ 리뷰 -->
     <div class="stepcard" id="s3">
       <div class="stephead"><span class="stepno">3</span> 리뷰 부탁 문자 보내기</div>
+      <div class="copylabel">이 문구가 복사돼요 (고쳐도 돼요 · 링크 줄은 지우지 마세요)</div>
+      <textarea id="reviewText" rows="13"></textarea>
       <button class="btn primary big" id="copyReview" type="button">📋 리뷰 문자 복사</button>
       <p class="stepdesc">→ 같은 문자방에 <b>붙여넣기 → 전송</b></p>
-      <details class="peek"><summary>문구 보기 · 고치기 (링크 줄은 지우지 마세요)</summary><textarea id="reviewText" rows="8"></textarea></details>
     </div>
 
     <!-- 한마디 -->
@@ -58,12 +62,7 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
     <button class="btn next" id="nextJob" type="button">✚ 다음 고객 시작 (새 현장)</button>
     <button class="btn" id="preview" type="button">👀 고객 화면 미리보기 (기록 안 남음)</button>
 
-    <details class="peek" id="staffBox"><summary>👥 같이 간 사람 기록하기 (선택)</summary>
-      <div class="chips staffchips" id="staffChips"></div>
-    </details>
-
     <h2 class="list-title">최근 작업 <button class="link" id="refresh" type="button">↻ 새로고침</button></h2>
-    <div class="chips" id="staffFilter"></div>
     <div class="sumbar" id="sumbar"></div>
     <p class="sub">고객 설문 답·후기 버튼 클릭이 작업마다 보여요 (몇 분 늦게 반영) · 전체 기록 <a id="sheetLink" target="_blank" rel="noopener">구글 시트</a> · 잘못 만든 작업은 🗑</p>
     <div id="list"><p class="sub">불러오는 중…</p></div>
