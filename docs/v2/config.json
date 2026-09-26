@@ -21,9 +21,9 @@
   "linkDays": 1,
   "pin": "1111",
   "settings": {
-    "bank": "",
-    "account": "",
-    "holder": ""
+    "bank": "카카오뱅크",
+    "account": "3333-25-6770006",
+    "holder": "김현재"
   },
   "links": {},
   "sheetUrl": "https://docs.google.com/spreadsheets/d/1jKcSMfcAAVmpoJTVKGFfUSACu7CEvrn_6ZzqWzDcLkU/edit"

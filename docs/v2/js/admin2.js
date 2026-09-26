@@ -179,7 +179,9 @@ function enter() {
   cur = readJson(CUR, null);
   if (!cur || !cur.created) freshJob();
   staffList = readJson(EXTRA, []);
-  render(); loadList();
+  render();
+  if (!staffList.length) $('staffChips').insertAdjacentHTML('afterbegin', '<span class="sub small" id="staffLoading">직원 명단 불러오는 중…</span>');
+  loadList();
 }
 
 async function main() {

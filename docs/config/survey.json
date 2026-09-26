@@ -11,7 +11,7 @@
         "거주 중",
         "기타"
       ],
-      "required": true,
+      "required": false,
       "requiredMsg": "어떤 청소였는지 하나만 골라주세요 🙂"
     },
     {
