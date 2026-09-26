@@ -26,7 +26,7 @@ export async function render(ctx) {
   };
   document.addEventListener('visibilitychange', onVisible);
 
-  const buttons = platforms.map(p => {
+  const buttons = platforms.filter(p => p.placement !== 'thanks').map(p => {
     const url = linkOf(p);
     if (p.enabled && url) {
       const a = h('a', { class: 'btn big ' + p.style, href: url, target: '_blank', rel: 'noopener' }, p.label);
