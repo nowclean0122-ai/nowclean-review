@@ -32,3 +32,4 @@ input#pin{text-align:center;letter-spacing:6px}
 .step-n{display:inline-block;margin-right:6px}
 .job{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14.5px}
 .link{background:none;border:none;color:var(--sub);text-decoration:underline;font-size:13px;cursor:pointer}
+.note{margin:-4px 0 8px;text-align:center;font-size:13px}

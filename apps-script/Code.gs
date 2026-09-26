@@ -21,17 +21,29 @@ const EVENT_LABEL = {
   job_created: '작업 생성', open: '링크 열람', reopen: '다시 열람',
   survey_view: '설문 화면', survey_start: '설문 시작', survey_submit: '설문 제출',
   review_view: '후기 화면', click_daangn: '🥕 당근 클릭', click_insta: '📷 인스타 클릭',
-  done: '다 했어요', thanks_view: '감사 화면', leave: '나감', 'return': '돌아옴',
+  done: '다 했어요', auto_thanks: '돌아와서 자동 감사', thanks_view: '감사 화면', leave: '나감', 'return': '돌아옴',
 };
 
 function doGet(e) {
   const p = e.parameter || {};
   try {
+    migrate_();
     if (p.action === 'job') return json_(publicJob_(p.j));
     return json_({ ok: true, service: 'nowclean-review' });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   }
+}
+
+function migrate_() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('MIG_INSTA')) return;
+  const rows = sheet_(TAB.settings).getDataRange().getValues();
+  rows.forEach((r, i) => {
+    if (r[0] === '인스타후기링크' && String(r[1]).indexOf('/p/') < 0) sheet_(TAB.settings).getRange(i + 1, 2).setValue('https://www.instagram.com/p/DdqqWnkEyxt/');
+  });
+  CacheService.getScriptCache().remove('settings');
+  props.setProperty('MIG_INSTA', '1');
 }
 
 function doPost(e) {
