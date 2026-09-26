@@ -1,0 +1,12 @@
+{
+  "_설명": "v2 설정 — 구글 설문지로 기록, 웹앱 없음. formAction·entries·key·publicCsv는 setupV2 실행 결과로 채움",
+  "formAction": "",
+  "entries": {},
+  "key": "",
+  "publicCsv": "",
+  "siteBase": "https://nowclean0122-ai.github.io/nowclean-review/v2/",
+  "linkDays": 1,
+  "pin": "1111",
+  "settings": { "bank": "", "account": "", "holder": "" },
+  "links": {}
+}

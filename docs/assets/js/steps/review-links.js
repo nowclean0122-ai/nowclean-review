@@ -6,6 +6,7 @@ import { loadJson } from '../core/api.js';
 import { log } from '../core/log.js';
 
 export async function render(ctx) {
+  const L = ctx.log || ((ev, step) => log(ctx.j, ev, step));
   const platforms = await loadJson('platforms.json');
   const job = await Promise.race([ctx.jobPromise, new Promise(r => setTimeout(() => r(null), 2500))]);
   const server = job?.links || {};
@@ -16,7 +17,7 @@ export async function render(ctx) {
     if (moved) return;
     moved = true;
     document.removeEventListener('visibilitychange', onVisible);
-    log(ctx.j, ev, 'review-links');
+    L(ev, 'review-links');
     ctx.next();
   };
   const onVisible = () => {
@@ -29,7 +30,7 @@ export async function render(ctx) {
     const url = linkOf(p);
     if (p.enabled && url) {
       const a = h('a', { class: 'btn big ' + p.style, href: url, target: '_blank', rel: 'noopener' }, p.label);
-      a.addEventListener('click', () => { clicked = true; log(ctx.j, 'click_' + p.key, 'review-links'); });
+      a.addEventListener('click', () => { clicked = true; L('click_' + p.key, 'review-links'); });
       return h('div', {}, a, p.note ? h('p', { class: 'sub note' }, p.note) : null);
     }
     if (p.showSoon) return h('div', { class: 'btn soon' }, p.label + ' · 준비 중');   // 누를 수 없는 회색 버튼
@@ -42,7 +43,7 @@ export async function render(ctx) {
   const done = h('button', { class: 'btn', type: 'button' }, '다 했어요 →');
   done.addEventListener('click', () => goNext('done'));
 
-  log(ctx.j, 'review_view', 'review-links');
+  L('review_view', 'review-links');
   return h('section', {},
     back,
     h('h1', {}, '짧은 후기 부탁드려요 🙏'),

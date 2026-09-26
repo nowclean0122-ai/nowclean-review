@@ -4,10 +4,11 @@ import { loadJson, post } from '../core/api.js';
 import { log, device, isPreview } from '../core/log.js';
 
 export async function render(ctx) {
+  const L = ctx.log || ((ev, step) => log(ctx.j, ev, step));
   const cfg = await loadJson('survey.json');
   const answers = ctx.state.answers || {};
   let started = false;
-  const markStart = () => { if (!started) { started = true; log(ctx.j, 'survey_start', 'survey'); } };
+  const markStart = () => { if (!started) { started = true; L('survey_start', 'survey'); } };
 
   const blocks = cfg.questions.map(q => {
     const chosen = new Set([].concat(answers[q.id] || []));
@@ -28,13 +29,16 @@ export async function render(ctx) {
   const next = h('button', { class: 'btn primary', type: 'button' }, '다음 →');
   next.addEventListener('click', () => {
     next.disabled = true;
-    if (!isPreview) post({ action: 'survey', j: ctx.j, answers, device: device() }).catch(() => {});   // 기다리지 않음
+    if (!isPreview) {   // 기다리지 않음
+      if (ctx.saveSurvey) ctx.saveSurvey(answers);
+      else post({ action: 'survey', j: ctx.j, answers, device: device() }).catch(() => {});
+    }
     ctx.next();
   });
 
   const skip = h('button', { class: 'link center', type: 'button' }, '설문 건너뛰기 →');
-  skip.addEventListener('click', () => { log(ctx.j, 'survey_skip', 'survey'); ctx.next(); });
+  skip.addEventListener('click', () => { L('survey_skip', 'survey'); ctx.next(); });
 
-  log(ctx.j, 'survey_view', 'survey');
+  L('survey_view', 'survey');
   return h('section', {}, h('h1', {}, cfg.title), h('p', { class: 'sub' }, '해당하는 것만 톡톡 눌러주세요 · 1분'), blocks, next, skip);
 }

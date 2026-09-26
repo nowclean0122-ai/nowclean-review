@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>나우클린 관리자</title>
+<link rel="stylesheet" href="../../assets/css/base.css">
+<script>/* 카카오톡 안에서 열리면 복사·기록이 막혀서 기본 브라우저로 다시 연다 */
+if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href);}
+</script>
+</head>
+<body>
+<div class="top"><b>나우클린 관리자</b><button class="link" id="logout">로그아웃</button></div>
+<main>
+  <section id="login">
+    <h1>관리자 번호</h1>
+    <p class="sub">나우클린 직원용 화면이에요 · 한 번 넣으면 이 폰에선 계속 기억해요</p>
+    <form id="pinForm"><input id="pin" inputmode="numeric" autocomplete="off" maxlength="8"><button class="btn primary" type="submit">들어가기</button></form>
+    <p class="sub" id="loginMsg"></p>
+  </section>
+
+  <section id="main" hidden>
+    <div class="jobcard" id="jobcard">
+      <div class="label">지금 작업</div>
+      <div id="jobname" class="jobname">새 작업 (아직 저장 전)</div>
+      <div class="sub" id="jobhint">문자를 처음 복사하는 순간 저장돼요. 여러 번 복사해도 작업은 1개예요.</div>
+    </div>
+
+    <div class="field">
+      <div class="label"><b>오늘 같이 간 사람</b> (여러 명 눌러도 돼요)</div>
+      <div class="chips staffchips" id="staffChips"></div>
+      <div class="addrow"><input id="newStaff" placeholder="새 이름" maxlength="20" autocomplete="off"><button class="btn" id="addStaff" type="button">＋ 이름 추가</button></div>
+    </div>
+
+    <div class="field">
+      <div class="label">잔금 금액 (카드 결제면 비워도 돼요)</div>
+      <input id="amount" inputmode="numeric" placeholder="250,000" autocomplete="off">
+    </div>
+
+    <p class="sub"><b>①</b> 전후 사진은 문자앱에서 바로 첨부해 보내기</p>
+
+    <div class="field">
+      <div class="label"><b>②</b> 계좌 문자 — 고쳐서 보내도 돼요</div>
+      <textarea id="accountText" rows="3"></textarea>
+      <button class="btn" id="copyAccount" type="button">📋 계좌 문자 복사</button>
+      <p class="sub small" id="acctNote"></p>
+    </div>
+
+    <div class="field">
+      <div class="label"><b>③</b> 리뷰 문자 — 고쳐서 보내도 돼요 (링크 줄은 지우지 마세요)</div>
+      <textarea id="reviewText" rows="9"></textarea>
+      <button class="btn primary" id="copyReview" type="button">📋 리뷰 문자 복사</button>
+    </div>
+
+    <button class="btn" id="preview" type="button">👀 고객 화면 미리보기 (기록 안 남음)</button>
+    <button class="btn next" id="nextJob" type="button">✚ 이 작업 끝 · 다음 작업 시작</button>
+
+    <h1 style="margin-top:26px">최근 작업 <button class="link" id="refresh" type="button">↻ 새로고침</button></h1>
+    <div class="chips" id="staffFilter"></div>
+    <div class="sumbar" id="sumbar"></div>
+    <p class="sub">고객 설문 답·후기 버튼 클릭이 작업마다 보여요 (몇 분 늦게 반영). 전체 기록은 <a id="sheetLink" target="_blank" rel="noopener">구글 시트</a> · 테스트 작업은 🗑</p>
+    <div id="list"><p class="sub">불러오는 중…</p></div>
+  </section>
+</main>
+<script type="module" src="../js/admin2.js"></script>
+</body>
+</html>
