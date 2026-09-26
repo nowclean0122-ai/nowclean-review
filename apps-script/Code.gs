@@ -3,13 +3,13 @@
  * 저장: 구글 시트(작업/기록/설문/설정/직원) · 메일: 이 계정 Gmail로 자기 자신에게
  * 화면(GitHub Pages)에서 GET/POST로 호출한다.
  *
- * 로그인: 관리자PIN(설정 탭) 하나로 모두 같은 화면 (예전 팀 PIN도 들어가짐)
- * 작업마다 담당 직원을 여러 명 고름 (직원 탭) · 고객 링크는 만든 뒤 N일(설정 "링크유효일", 기본 60) 지나거나 삭제하면 닫힘
+ * 로그인: 관리자PIN(설정 탭) 하나로 모두 같은 화면
+ * 작업마다 담당 직원을 여러 명 고름 (직원 탭) · 고객 링크는 만든 뒤 N일(설정 "링크유효일", 기본 1일) 지나거나 삭제하면 닫힘
  * 시트 열 구성
  *   작업: 생성 시각 | 작업 이름 | 금액 | 토큰 | 상태 | 담당 직원
  *   기록: 시각 | 작업 이름 | 토큰 | 이벤트 | 화면 | 청소 후 경과 | 기기 | 담당 직원
  *   설문: 첫 제출 | 작업 이름 | 토큰 | 청소 종류 | 깨끗해진 곳 | 좋았던 점 | 담당 직원 | 수정 횟수 | 마지막 수정   ← 링크 1개당 1줄
- *   직원: 이름 | 메모          (팀 탭은 예전 것 — PIN만 로그인에 계속 인정)
+ *   직원: 이름 | 상태(사용/숨김 — 숨김이면 화면에 안 보임, 지우지 않음) | 메모   (팀 탭은 예전 것, 안 씀)
  */
 
 const TAB = { job: '작업', log: '기록', survey: '설문', settings: '설정', team: '팀', staff: '직원' };
@@ -68,7 +68,7 @@ function doPost(e) {
 
 /* ---------- 고객 쪽 ---------- */
 
-function linkDays_() { return Number(settings_()['링크유효일']) || 60; }
+function linkDays_() { const d = Number(settings_()['링크유효일']); return d > 0 ? d : 1; }   // 일 단위, 0.05 ≈ 1시간
 function isClosed_(job) { return job.status === '삭제' || (Date.now() - job.created.getTime()) > linkDays_() * 86400000; }
 
 function publicJob_(token) {
@@ -121,12 +121,11 @@ function saveSurvey_(b) {
 
 /* ---------- 관리자 쪽 ---------- */
 
-// PIN 확인 — 관리자PIN 또는 예전 팀 PIN이면 모두 같은 화면
+// PIN 확인 — 관리자PIN 하나
 function auth_(pin) {
   pin = String(pin || '').trim();
   if (!pin) throw new Error('PIN을 넣어주세요');
   if (pin === String(settings_()['관리자PIN'])) return true;
-  if (teams_().some(x => x.pin === pin)) return true;
   throw new Error('PIN이 맞지 않아요');
 }
 
@@ -140,9 +139,12 @@ function login_(b) {
   };
 }
 
+// 화면에 보이는 직원 = 상태가 "숨김"이 아닌 사람
 function staff_() {
   const sh = sheet_(TAB.staff);
-  return sh ? sh.getDataRange().getValues().slice(1).map(r => String(r[0]).trim()).filter(Boolean) : [];
+  return sh ? sh.getDataRange().getValues().slice(1)
+    .filter(r => String(r[0]).trim() && String(r[1]).trim() !== '숨김')
+    .map(r => String(r[0]).trim()) : [];
 }
 
 // 관리자 화면에서 새 직원 이름 추가
@@ -150,7 +152,11 @@ function addStaff_(b) {
   auth_(b.pin);
   const name = String(b.name || '').trim().slice(0, 20);
   if (!name) return { ok: false, error: '이름을 넣어주세요' };
-  if (staff_().indexOf(name) < 0) sheet_(TAB.staff).appendRow([name, '']);
+  const sh = sheet_(TAB.staff);
+  const rows = sh.getDataRange().getValues();
+  const i = rows.findIndex((r, k) => k > 0 && String(r[0]).trim() === name);
+  if (i > 0) sh.getRange(i + 1, 2).setValue('사용');   // 숨겼던 사람을 다시 추가하면 다시 보이게
+  else sh.appendRow([name, '사용', '']);
   return { ok: true, staff: staff_() };
 }
 
@@ -211,8 +217,18 @@ function updateJob_(b) {
   auth_(b.pin);
   const hit = jobRow_(String(b.token || ''));
   if (!hit) return { ok: false, error: 'no job' };
-  sheet_(TAB.job).getRange(hit.row, 3).setValue(Number(b.amount) || '');
-  return { ok: true };
+  const sh = sheet_(TAB.job);
+  if (b.amount !== undefined) sh.getRange(hit.row, 3).setValue(Number(b.amount) || '');
+  let name;
+  if (Array.isArray(b.staff)) {
+    const staff = b.staff.map(s => String(s).trim().slice(0, 20)).filter(Boolean).join('·');
+    const created = new Date(sh.getRange(hit.row, 1).getValue());
+    name = (staff ? staff + ' · ' : '') + jobName_(created);
+    sh.getRange(hit.row, 2).setValue(name);
+    sh.getRange(hit.row, 6).setValue(staff);
+    CacheService.getScriptCache().remove('job_' + String(b.token));
+  }
+  return { ok: true, name };
 }
 
 // 테스트·실수로 만든 작업 지우기 — 줄은 남기고 상태만 "삭제" (기록은 보존)
@@ -298,7 +314,7 @@ function sheetId_() {
     ['예금주', '나우클린', '예: 홍길동(나우클린)'],
     ['당근후기링크', 'https://www.daangn.com/kr/local-profile/wkyp8ke12i96/', '후기쓰기 직행 링크로 바꾸기'],
     ['인스타후기링크', 'https://www.instagram.com/p/DdqqWnkEyxt/', '후기 고정 게시물 링크'],
-    ['관리자PIN', randomPin_([]), '대표용 — 모든 팀 작업을 봄 (숫자 4자리)'],
+    ['관리자PIN', '1111', '관리자 화면 비밀번호 — 모두 같이 씀'],
     ['알림메일', '', '비우면 이 구글 계정으로 요약 메일'],
     ['카카오맵링크', '', '비워두면 버튼 안 보임'],
   ]);
@@ -311,11 +327,11 @@ function sheetId_() {
 // 예전 모양의 시트를 새 열 구성·팀 탭으로 맞춤 (한 번만)
 function migrate_() {
   const props = PropertiesService.getScriptProperties();
-  if (props.getProperty('SCHEMA') === '3') return;
+  if (props.getProperty('SCHEMA') === '4') return;
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    if (props.getProperty('SCHEMA') === '3') return;
+    if (props.getProperty('SCHEMA') === '4') return;
     const ss = SpreadsheetApp.openById(sheetId_());
     if (!ss.getSheetByName(TAB.staff)) {
       const sf = ss.insertSheet(TAB.staff);
@@ -345,7 +361,23 @@ function migrate_() {
       if (r[0] === '인스타후기링크' && String(r[1]).indexOf('/p/') < 0) st.getRange(i + 1, 2).setValue('https://www.instagram.com/p/DdqqWnkEyxt/');
     });
     CacheService.getScriptCache().removeAll(['settings', 'teams']);
-    props.setProperty('SCHEMA', '3');
+    // 4: 직원 탭 상태 열 · 관리자PIN 1111 · 링크유효일 1일 (사용자 결정 9/26)
+    const sf2 = ss.getSheetByName(TAB.staff);
+    const srows = sf2.getDataRange().getValues();
+    if (String(srows[0][1]).indexOf('상태') < 0) {
+      sf2.insertColumnAfter(1);
+      sf2.getRange(1, 2).setValue('상태');
+      if (srows.length > 1) sf2.getRange(2, 2, srows.length - 1, 1).setValue('사용');
+    }
+    sf2.getRange(1, 5).setValue('안 보이게 하려면 상태를 "숨김"으로 (지우지 말기 — 예전 작업 기록에 이름이 남아 있어요). 다시 쓰면 "사용".');
+    sf2.getRange('B2:B500').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['사용', '숨김'], true).setAllowInvalid(false).build());
+    const st4 = ss.getSheetByName(TAB.settings);
+    st4.getDataRange().getValues().forEach((r, i) => {
+      if (r[0] === '관리자PIN') { st4.getRange(i + 1, 2).setNumberFormat('@').setValue('1111'); st4.getRange(i + 1, 3).setValue('관리자 화면 비밀번호 — 모두 같이 씀'); }
+      if (r[0] === '링크유효일') { st4.getRange(i + 1, 2).setValue(1); st4.getRange(i + 1, 3).setValue('고객 링크가 열려 있는 기간(일). 작업 만든 때부터. 0.05 = 약 1시간'); }
+    });
+    CacheService.getScriptCache().removeAll(['settings', 'teams']);
+    props.setProperty('SCHEMA', '4');
   } finally {
     lock.releaseLock();
   }

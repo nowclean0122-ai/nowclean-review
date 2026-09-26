@@ -1,5 +1,5 @@
 // 로컬 테스트용: docs/ 화면 + 가짜 Apps Script(/api)를 한 서버에서 띄운다.
-// 실행: node tools/mock-server.mjs  →  http://localhost:4610/admin/  (PIN 1234, 직원 김주현·박수현)
+// 실행: node tools/mock-server.mjs  →  http://localhost:4610/admin/  (PIN 1234, 직원 김주현·박수현 — 실제 사이트 PIN은 시트 설정 탭)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -26,7 +26,7 @@ function api(body) {
       logs.push([body.token, 'job_created']);
       return { ok: true, name: jobs.at(-1).name };
     }
-    case 'updateJob': { const x = jobs.find(j => j.token === body.token); if (x) x.amount = body.amount; return { ok: !!x }; }
+    case 'updateJob': { const x = jobs.find(j => j.token === body.token); if (!x) return { ok: false }; if (body.amount !== undefined) x.amount = body.amount; if (body.staff) { x.staff = body.staff.join('·'); x.name = (x.staff ? x.staff + ' · ' : '') + x.name.split(' · ').pop(); } return { ok: true, name: x.name }; }
     case 'deleteJob': { const x = jobs.find(j => j.token === body.token); if (x) x.deleted = true; return { ok: !!x }; }
     case 'listJobs': {
       const list = jobs.filter(j => !j.deleted && (!body.staff || j.staff.split('·').includes(body.staff))).slice().reverse().map(j => {

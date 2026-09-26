@@ -48,13 +48,13 @@ function renderStaff() {
     b.type = 'button';
     b.className = 'chip' + (chosen.has(name) ? ' on' : '');
     b.textContent = name;
-    b.disabled = cur.saved;   // 저장된 작업은 사람을 바꾸지 않음
     b.addEventListener('click', () => {
       chosen.has(name) ? chosen.delete(name) : chosen.add(name);
       cur.staff = staffList.filter(n => chosen.has(n));
       saveCur();
       localStorage.setItem(LAST_STAFF, JSON.stringify(cur.staff));
       renderStaff(); renderCard();
+      if (cur.saved) saveStaffChange();   // 저장된 작업이면 서버의 담당 직원·작업 이름도 고침
     });
     return b;
   }));
@@ -70,6 +70,19 @@ function renderStaff() {
   }));
 }
 
+// 저장된 작업의 사람을 바꾼 경우 — 연달아 누를 수 있어 0.8초 모았다가 한 번 보냄
+let staffTimer = null;
+function saveStaffChange() {
+  clearTimeout(staffTimer);
+  staffTimer = setTimeout(async () => {
+    const r = await post({ action: 'updateJob', pin, token: cur.token, staff: cur.staff }).catch(() => ({}));
+    if (!r.ok) return toast('⚠️ 사람 바꾸기 저장 실패');
+    if (r.name) { cur.name = r.name; saveCur(); renderCard(); }
+    toast('✔ 같이 간 사람 바꿨어요');
+    loadList();
+  }, 800);
+}
+
 async function addStaff() {
   const name = $('newStaff').value.trim();
   if (!name) return toast('이름을 넣어주세요');
@@ -78,7 +91,7 @@ async function addStaff() {
     const r = await post({ action: 'addStaff', pin, name });
     if (!r.ok) throw new Error(r.error);
     staffList = r.staff;
-    if (!cur.saved && !cur.staff.includes(name)) { cur.staff.push(name); saveCur(); localStorage.setItem(LAST_STAFF, JSON.stringify(cur.staff)); }
+    if (!cur.staff.includes(name)) { cur.staff.push(name); saveCur(); localStorage.setItem(LAST_STAFF, JSON.stringify(cur.staff)); if (cur.saved) saveStaffChange(); }
     $('newStaff').value = '';
     renderStaff(); renderCard();
     toast('✔ ' + name + ' 추가됐어요');
@@ -92,7 +105,7 @@ function renderCard() {
   const who = cur.staff.length ? cur.staff.join('·') + ' · ' : '';
   $('jobname').textContent = cur.saved ? cur.name : who + '새 작업 (아직 저장 전)';
   $('jobhint').textContent = cur.saved
-    ? '저장된 작업이에요. 다시 복사해도 새 작업이 생기지 않아요.'
+    ? '저장된 작업이에요. 다시 복사해도 새 작업이 생기지 않아요. 같이 간 사람은 지금도 바꿀 수 있어요.'
     : '문자를 처음 복사하는 순간 저장돼요. 여러 번 복사해도 작업은 1개예요.';
   $('jobcard').classList.toggle('saved', cur.saved);
 }
