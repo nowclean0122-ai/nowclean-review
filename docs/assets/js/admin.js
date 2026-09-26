@@ -4,9 +4,11 @@ import { post, appConfig, loadJson } from './core/api.js';
 import { copyText, toast } from './core/clipboard.js';
 
 const $ = id => document.getElementById(id);
-const CUR = 'nc_current';
+let CUR = 'nc_current';   // 팀마다 따로: nc_current_A팀
 let pin = localStorage.getItem('nc_pin') || '';
 let settings = null, messages = null, cfg = null;
+let me = { role: 'team', team: '', teams: [] };   // 로그인한 팀
+let listTeam = '';                                  // 대표가 목록에서 고른 팀 ('' = 전체)
 let cur = null;   // { token, saved, name, amount, accountEdited, reviewEdited }
 
 const readCur = () => { try { return JSON.parse(localStorage.getItem(CUR) || 'null'); } catch (e) { return null; } };
@@ -59,7 +61,7 @@ function ensureSaved() {
     return;
   }
   cur.saved = true; cur.amount = amount; cur.name = '저장 중…'; saveCur(); render();
-  post({ action: 'createJob', pin, token: cur.token, amount })
+  post({ action: 'createJob', pin, token: cur.token, amount, team: me.role === 'owner' ? $('teamSelect').value : '' })
     .then(r => {
       if (!r.ok) { cur.saved = false; saveCur(); render(); return toast('⚠️ 작업 저장 실패: ' + (r.error || '')); }
       if (r.name) { cur.name = r.name; saveCur(); render(); }
@@ -74,7 +76,10 @@ async function login() {
     const r = await post({ action: 'login', pin });
     if (!r.ok) throw new Error(r.error);
     settings = r.settings;
+    me = { role: r.role, team: r.team, teams: r.teams || [] };
+    CUR = 'nc_current_' + me.team;
     localStorage.setItem('nc_pin', pin);
+    setupTeamUi(r.daangnUrl);
     $('login').hidden = true;
     $('main').hidden = false;
     cur = readCur() || null;
@@ -89,11 +94,34 @@ async function login() {
   }
 }
 
+function setupTeamUi(daangnUrl) {
+  $('teambadge').hidden = false;
+  $('teambadge').textContent = me.role === 'owner' ? '대표 · 전체' : me.team;
+  $('daangnLink').href = daangnUrl || '#';
+  const owner = me.role === 'owner';
+  $('teamPick').hidden = !owner;
+  $('teamFilter').hidden = !owner;
+  $('listTitle').textContent = owner ? '팀별 최근 작업' : '우리 팀 최근 작업';
+  if (!owner) return;
+  $('teamSelect').replaceChildren(...[...me.teams, '대표'].map(t => { const o = document.createElement('option'); o.value = t === '대표' ? '' : t; o.textContent = t; return o; }));
+  const chips = ['전체', ...me.teams].map(t => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip' + ((t === '전체' ? '' : t) === listTeam ? ' on' : ''); b.textContent = t;
+    b.addEventListener('click', () => { listTeam = t === '전체' ? '' : t; setupTeamUi(daangnUrl); loadList(); });
+    return b;
+  });
+  $('teamFilter').replaceChildren(...chips);
+}
+
+const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
 async function loadList() {
   const box = $('list');
   try {
-    const r = await post({ action: 'listJobs', pin });
+    const r = await post({ action: 'listJobs', pin, team: listTeam });
     if (!r.ok) return;
+    const s = r.sum;
+    $('sumbar').textContent = `${r.team} · 작업 ${s.jobs} · 링크 열람 ${s.opened} · 설문 ${s.survey} · 🥕 당근 ${s.daangn} · 📷 인스타 ${s.insta}`;
     if (!r.jobs.length) { box.innerHTML = '<p class="sub">아직 작업이 없어요</p>'; return; }
     box.replaceChildren(...r.jobs.map(j => {
       const d = document.createElement('div');
@@ -101,7 +129,10 @@ async function loadList() {
       const amt = j.amount ? ' · ' + fmt(Number(j.amount)) + '원' : '';
       const clicks = (j.clicks.daangn ? ' · 🥕' : '') + (j.clicks.insta ? ' · 📷' : '');
       const tag = cur && j.token === cur.token ? ' <span class="nowtag">지금 작업</span>' : '';
-      d.innerHTML = `<div><b>${j.name}</b>${amt}${tag}<br><span class="sub">지금까지: ${j.stage}${clicks}</span></div>`;
+      const sv = j.survey
+        ? `<div class="ans">${esc(j.survey.type)}${j.survey.clean ? ' · <b>깨끗</b> ' + esc(j.survey.clean) : ''}${j.survey.good ? ' · <b>좋았던 점</b> ' + esc(j.survey.good) : ''}${j.survey.edits ? ' (수정 ' + j.survey.edits + '회)' : ''}</div>`
+        : '';
+      d.innerHTML = `<div><b>${esc(j.name)}</b>${amt}${tag}<br><span class="sub">지금까지: ${j.stage}${clicks}</span>${sv}</div>`;
       const del = document.createElement('button');
       del.className = 'link'; del.type = 'button'; del.textContent = '🗑';
       del.addEventListener('click', async () => {

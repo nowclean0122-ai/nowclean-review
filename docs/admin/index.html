@@ -11,11 +11,11 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
 </script>
 </head>
 <body>
-<div class="top"><b>나우클린 관리자</b><button class="link" id="logout">로그아웃</button></div>
+<div class="top"><b>나우클린 관리자 <span class="teambadge" id="teambadge" hidden></span></b><button class="link" id="logout">로그아웃</button></div>
 <main>
   <section id="login">
     <h1>PIN 입력</h1>
-    <p class="sub">구글 시트 "설정" 탭의 관리자PIN · 한 번 넣으면 이 폰·이 브라우저에선 계속 기억해요</p>
+    <p class="sub">우리 팀 PIN (구글 시트 "팀" 탭) · 대표는 "설정" 탭의 관리자PIN<br>한 번 넣으면 이 폰·이 브라우저에선 계속 기억해요</p>
     <form id="pinForm"><input id="pin" inputmode="numeric" autocomplete="off" maxlength="8"><button class="btn primary" type="submit">들어가기</button></form>
     <p class="sub" id="loginMsg"></p>
   </section>
@@ -25,6 +25,11 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
       <div class="label">지금 작업</div>
       <div id="jobname" class="jobname">새 작업 (아직 저장 전)</div>
       <div class="sub" id="jobhint">문자를 처음 복사하는 순간 지금 시각으로 저장돼요. 여러 번 복사해도 작업은 1개예요.</div>
+    </div>
+
+    <div class="field" id="teamPick" hidden>
+      <div class="label">어느 팀 작업인가요? (대표 전용)</div>
+      <select id="teamSelect"></select>
     </div>
 
     <div class="field">
@@ -50,8 +55,10 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
     <button class="btn" id="preview" type="button">👀 고객 화면 미리보기 (기록 안 남음)</button>
     <button class="btn next" id="nextJob" type="button">✚ 이 작업 끝 · 다음 작업 시작</button>
 
-    <h1 style="margin-top:26px">최근 작업</h1>
-    <p class="sub">테스트로 만든 작업은 🗑로 지우면 목록·요약 메일에서 빠져요</p>
+    <h1 style="margin-top:26px" id="listTitle">우리 팀 최근 작업</h1>
+    <div class="chips" id="teamFilter" hidden></div>
+    <div class="sumbar" id="sumbar"></div>
+    <p class="sub">고객이 설문에 고른 내용이 작업마다 보여요. 실제 후기 글은 <a id="daangnLink" target="_blank" rel="noopener">당근 비즈프로필</a>에서 확인 · 테스트 작업은 🗑로 지우기</p>
     <div id="list"><p class="sub">불러오는 중…</p></div>
   </section>
 </main>
