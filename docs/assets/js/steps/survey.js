@@ -2,6 +2,7 @@
 import { h } from '../core/dom.js';
 import { loadJson, post } from '../core/api.js';
 import { log, device, isPreview } from '../core/log.js';
+import { toast } from '../core/clipboard.js';
 
 export async function render(ctx) {
   const L = ctx.log || ((ev, step) => log(ctx.j, ev, step));
@@ -16,6 +17,7 @@ export async function render(ctx) {
       const b = h('button', { class: 'chip' + (chosen.has(opt) ? ' on' : ''), type: 'button' }, opt);
       b.addEventListener('click', () => {
         markStart();
+        b.closest('.q')?.classList.remove('need');
         if (q.multi) { chosen.has(opt) ? chosen.delete(opt) : chosen.add(opt); b.classList.toggle('on'); }
         else { chosen.clear(); chosen.add(opt); b.parentElement.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); }
         answers[q.id] = q.multi ? [...chosen] : [...chosen][0];
@@ -23,11 +25,18 @@ export async function render(ctx) {
       });
       return b;
     });
-    return h('div', { class: 'q' }, h('div', { class: 'ql' }, q.label), h('div', { class: 'chips' }, chips));
+    return h('div', { class: 'q', 'data-q': q.id }, h('div', { class: 'ql' }, q.label + (q.required ? ' *' : '')), h('div', { class: 'chips' }, chips));
   });
 
   const next = h('button', { class: 'btn primary', type: 'button' }, '다음 →');
   next.addEventListener('click', () => {
+    // 꼭 골라야 하는 질문(예: 어떤 청소였나요?)을 안 골랐으면 그 질문으로 안내
+    const miss = cfg.questions.find(q => q.required && ![].concat(answers[q.id] || []).length);
+    if (miss) {
+      const box = document.querySelector('[data-q="' + miss.id + '"]');
+      box.classList.add('need'); box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return toast(miss.requiredMsg || '표시(*)된 질문을 골라주세요');
+    }
     next.disabled = true;
     if (!isPreview) {   // 기다리지 않음
       if (ctx.saveSurvey) ctx.saveSurvey(answers);

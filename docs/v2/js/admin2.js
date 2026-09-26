@@ -58,7 +58,11 @@ function renderStaff() {
     });
     return b;
   }));
-  if (!staffList.length) $('staffChips').innerHTML = '<p class="sub small">아직 이름이 없어요 — 아래에서 추가해 주세요</p>';
+  // 목록에 없는 사람 = 기타 → 이름 적기
+  const etc = document.createElement('button');
+  etc.type = 'button'; etc.className = 'chip etc'; etc.textContent = '＋ 기타';
+  etc.addEventListener('click', () => { const n = prompt('같이 간 사람 이름을 적어주세요'); if (n && n.trim()) addStaff(n); });
+  $('staffChips').append(etc);
   $('staffFilter').replaceChildren(...['전체', ...staffList].map(name => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'chip' + ((name === '전체' ? '' : name) === listWho ? ' on' : ''); b.textContent = name;
@@ -78,14 +82,13 @@ function saveStaffChange() {
   }, 800);
 }
 
-function addStaff() {
-  const name = $('newStaff').value.trim().slice(0, 20);
+function addStaff(input) {
+  const name = String(input || '').trim().slice(0, 20);
   if (!name) return toast('이름을 넣어주세요');
   admin({ 종류: '직원', 토큰: 'staffadd', 담당직원: name });
   const extra = readJson(EXTRA, []); if (!extra.includes(name)) { extra.push(name); writeJson(EXTRA, extra); }
   if (!staffList.includes(name)) staffList.push(name);
   if (!cur.staff.includes(name)) { cur.staff.push(name); saveCur(); writeJson(LAST_STAFF, cur.staff); if (cur.saved) saveStaffChange(); }
-  $('newStaff').value = '';
   renderStaff(); renderCard();
   toast('✔ ' + name + ' 추가됐어요 (다른 폰엔 몇 분 뒤 보여요)');
 }
@@ -189,8 +192,6 @@ async function main() {
     if ($('pin').value.trim() !== String(cfg.pin)) { $('loginMsg').textContent = '번호가 맞지 않아요'; return; }
     localStorage.setItem('nc2_in', '1'); enter();
   });
-  $('addStaff').addEventListener('click', addStaff);
-  $('newStaff').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addStaff(); } });
   $('amount').addEventListener('input', () => {
     const n = amountValue(); $('amount').value = n ? fmt(n) : '';
     if (!cur.saved) { cur.amount = n; saveCur(); }

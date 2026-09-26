@@ -55,3 +55,5 @@ select{width:100%;font-size:17px;padding:10px;border:1.5px solid var(--line);bor
 .addrow input{font-size:15px;text-align:left;padding:8px 10px}
 .addrow button{white-space:nowrap;width:auto;margin:0;padding:8px 12px;font-size:14px}
 .chip:disabled{opacity:.75;cursor:default}
+.q.need{border-color:#e11d48;box-shadow:0 0 0 3px rgba(225,29,72,.15)}
+.chip.etc{border-style:dashed;color:#6b7280}
