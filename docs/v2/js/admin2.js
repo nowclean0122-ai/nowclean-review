@@ -50,7 +50,7 @@ function renderCard() {
   const min = Math.max(0, Math.round((Date.now() - cur.created) / 60000));
   $('jobname').textContent = cur.saved ? cur.name : '';
   $('jobhint').textContent = cur.saved
-    ? `지금 고객: ${cur.name} 시작 (${min}분 전) · 다음 고객이면 맨 아래 "다음 고객 시작"`
+    ? `지금 고객: ${cur.name} 시작 (${min}분 전) · 끝나면 맨 아래 "이 고객 끝"`
     : '위에서부터 차례로 누르면 끝나요';
   ['s1', 's2', 's3'].forEach(id => $(id).classList.toggle('done', !!(cur.steps || {})[id]));
 }
@@ -71,9 +71,8 @@ function okToReuse() {
   const min = Math.round((Date.now() - cur.created) / 60000);
   if (min < OLD_MIN) return true;
   const ago = min < 120 ? min + '분' : Math.round(min / 60) + '시간';
-  if (confirm(`이 문자는 ${ago} 전(${cur.name})에 시작한 고객 거예요.\n\n같은 고객에게 다시 보내는 거면 [확인]\n새 고객이면 [취소] 후 맨 아래 "다음 고객 시작"을 먼저 눌러주세요.`)) return true;
-  $('nextJob').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  $('nextJob').classList.add('pulse');
+  if (confirm(`이 문자는 ${ago} 전(${cur.name})에 시작한 고객 거예요.\n\n같은 고객에게 다시 보내는 거면 [확인]\n새 고객이면 [취소] → "이번 고객 리뷰 요청 시작"을 눌러주세요.`)) return true;
+  showStart(); $('startNew').classList.add('pulse');
   return false;
 }
 
@@ -133,6 +132,18 @@ async function loadList() {
 
 /* ---------- 시작 ---------- */
 
+// 열 때마다 시작 화면. 30분 안에 시작한 고객이 있으면 '이어서' 링크만 작게
+const RESUME_MIN = 30;
+function showStart() {
+  $('start').hidden = false; $('flow').hidden = true;
+  const min = cur && cur.saved && !cur.done ? Math.round((Date.now() - cur.created) / 60000) : 999;
+  const r = $('resume');
+  r.hidden = !(min < RESUME_MIN);
+  if (!r.hidden) r.textContent = '↩ 방금 하던 고객 이어서 (' + cur.name + ' · ' + min + '분 전)';
+  window.scrollTo(0, 0);
+}
+function showFlow() { $('start').hidden = true; $('flow').hidden = false; render(); window.scrollTo(0, 0); }
+
 function enter() {
   $('login').hidden = true; $('main').hidden = false;
   // 예전 버전이 폰에 남긴 직원 이름 기록은 지움
@@ -140,7 +151,7 @@ function enter() {
   cur = readJson(CUR, null);
   if (!cur || !cur.created) freshJob();
   if (cur.staff || /·/.test(cur.name || '')) { delete cur.staff; if (cur.saved) cur.name = jobName(new Date(cur.created)); saveCur(); }
-  render();
+  showStart();
   loadList();
 }
 
@@ -178,12 +189,9 @@ async function main() {
     if (!cur.saved) return toast('문자를 한 번 복사해서 저장한 뒤에 볼 수 있어요');
     window.open(reviewLink() + '&preview=1', '_blank');
   });
-  $('nextJob').addEventListener('click', () => {
-    if (cur.saved && !confirm(`${cur.name}에 시작한 고객은 끝내고, 다음 고객을 시작할까요?`)) return;
-    freshJob(); render(); loadList();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast('✚ 새 고객 준비됐어요 — 1번부터');
-  });
+  $('startNew').addEventListener('click', () => { freshJob(); showFlow(); toast('✚ 이번 고객 링크 준비됐어요 — 1번부터'); });
+  $('resume').addEventListener('click', () => showFlow());
+  $('nextJob').addEventListener('click', () => { cur.done = true; saveCur(); showStart(); $('resume').hidden = true; loadList(); toast('수고하셨어요! 다음 고객은 위 버튼으로'); });
   $('logout').addEventListener('click', () => { localStorage.removeItem('nc2_in'); location.reload(); });
   $('refresh').addEventListener('click', () => { loadList(); toast('목록 새로 불러오는 중'); });
 

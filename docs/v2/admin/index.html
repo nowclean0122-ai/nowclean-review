@@ -21,7 +21,16 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
   </section>
 
   <section id="main" hidden>
-    <h1 class="big-title">청소 끝! 고객님께 문자 3통 🙌</h1>
+    <!-- 시작 화면: 열 때마다 여기서 새 고객 시작 -->
+    <div id="start">
+      <h1 class="big-title">청소 끝났나요? 🙌</h1>
+      <p class="sub">버튼을 누르면 이번 고객님 전용 리뷰 링크가 만들어져요</p>
+      <button class="btn primary start-btn" id="startNew" type="button">📨 이번 고객 리뷰 요청 시작</button>
+      <button class="link center" id="resume" type="button" hidden></button>
+    </div>
+
+    <div id="flow" hidden>
+    <h1 class="big-title">고객님께 문자 3통 보내기</h1>
     <p class="sub" id="jobhint">위에서부터 차례로 누르면 끝나요</p>
     <div id="jobcard" hidden><span id="jobname"></span></div>
 
@@ -59,8 +68,9 @@ if(/KAKAOTALK/i.test(navigator.userAgent)){location.href="kakaotalk://web/openEx
       <p class="stepdesc">"방금 사진이랑 계좌, 설문 링크 보내드렸어요. 사진은 하나 눌러서 <b>전체 저장</b> 해두시면 후기에 같이 올리실 수 있어요. 1분 설문이랑 짧은 후기 남겨주시면 정말 큰 힘이 됩니다!"</p>
     </div>
 
-    <button class="btn next" id="nextJob" type="button">✚ 다음 고객 시작 (새 현장)</button>
     <button class="btn" id="preview" type="button">👀 고객 화면 미리보기 (기록 안 남음)</button>
+    <button class="btn next" id="nextJob" type="button">✔ 이 고객 끝 · 처음 화면으로</button>
+    </div>
 
     <h2 class="list-title">최근 작업 <button class="link" id="refresh" type="button">↻ 새로고침</button></h2>
     <div class="sumbar" id="sumbar"></div>
