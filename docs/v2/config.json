@@ -1,12 +1,30 @@
 {
   "_설명": "v2 설정 — 구글 설문지로 기록, 웹앱 없음. formAction·entries·key·publicCsv는 setupV2 실행 결과로 채움",
-  "formAction": "",
-  "entries": {},
-  "key": "",
+  "formAction": "https://docs.google.com/forms/d/e/1FAIpQLSei61bfBtcKqPFm0zU3PaW2J6RDrhRUPkcEdpeBVAPGapmAgA/formResponse",
+  "entries": {
+    "종류": "entry.1938885669",
+    "토큰": "entry.382822232",
+    "이벤트": "entry.2055114506",
+    "화면": "entry.655128289",
+    "기기": "entry.1582564840",
+    "작업이름": "entry.889233218",
+    "담당직원": "entry.196248215",
+    "금액": "entry.84651495",
+    "청소종류": "entry.583130689",
+    "깨끗해진곳": "entry.1263118836",
+    "좋았던점": "entry.36794446",
+    "키": "entry.1305340581"
+  },
+  "key": "bb606f51",
   "publicCsv": "",
   "siteBase": "https://nowclean0122-ai.github.io/nowclean-review/v2/",
   "linkDays": 1,
   "pin": "1111",
-  "settings": { "bank": "", "account": "", "holder": "" },
-  "links": {}
+  "settings": {
+    "bank": "",
+    "account": "",
+    "holder": ""
+  },
+  "links": {},
+  "sheetUrl": "https://docs.google.com/spreadsheets/d/1jKcSMfcAAVmpoJTVKGFfUSACu7CEvrn_6ZzqWzDcLkU/edit"
 }
