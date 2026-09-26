@@ -202,16 +202,20 @@ function saveSurvey_(token, v) {
   const job = findJob_(token);
   if (!job || job.status === '삭제') return;
   const sh = sheet_(TAB.survey);
+  if (String(sh.getRange(1, 10).getValue()) !== '기기') sh.getRange(1, 10).setValue('기기');
   const rows = sh.getDataRange().getValues();
-  const row = rows.findIndex((r, k) => k > 0 && r[2] === token) + 1;
+  const dev = v['기기'].slice(0, 40);
+  // 같은 링크 + 같은 폰 = 같은 사람 → 그 줄을 고침 / 같은 링크인데 다른 폰 = 링크를 여럿에게 보낸 것 → 따로 한 줄(덮어쓰지 않음)
+  const row = rows.findIndex((r, k) => k > 0 && r[2] === token && (String(r[9] || '') === dev || !r[9])) + 1;
+  const other = rows.some((r, k) => k > 0 && r[2] === token);
   const now = new Date();
   const vals = [v['청소종류'].slice(0, 50), v['깨끗해진곳'].slice(0, 500), v['좋았던점'].slice(0, 500)];
   if (row > 0) {
     const times = Number(rows[row - 1][7] || 0) + 1;
-    sh.getRange(row, 4, 1, 6).setValues([vals.concat([job.staff, times, now])]);
+    sh.getRange(row, 4, 1, 7).setValues([vals.concat([job.staff, times, now, dev])]);
     appendLog_(job, 'survey_update', 'survey', v['기기']);
   } else {
-    sh.appendRow([now, job.name, token].concat(vals, [job.staff, 0, now]));
+    sh.appendRow([now, job.name + (other ? ' (같은 링크·다른 기기)' : ''), token].concat(vals, [job.staff, 0, now, dev]));
     appendLog_(job, 'survey_submit', 'survey', v['기기']);
   }
 }

@@ -66,3 +66,5 @@ select{width:100%;font-size:17px;padding:10px;border:1.5px solid var(--line);bor
 .row2 .btn.soon{padding:10px 6px;font-size:13.5px}
 .btn.soon small{font-weight:600;font-size:12px}
 .again{background:#e8f6ec;color:#15803d;border-radius:10px;padding:8px 12px;font-size:14px;font-weight:600;margin:6px 0}
+@keyframes ncpulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.5)}50%{box-shadow:0 0 0 8px rgba(31,111,235,0)}}
+.btn.pulse{animation:ncpulse 1.2s 4;border-color:var(--brand)}

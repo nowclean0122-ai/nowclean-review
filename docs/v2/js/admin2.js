@@ -98,7 +98,7 @@ function addStaff(input) {
 function renderCard() {
   $('jobname').textContent = cur.saved ? cur.name : (cur.staff.length ? cur.staff.join('·') + ' · ' : '') + '새 작업 (아직 저장 전)';
   $('jobhint').textContent = cur.saved
-    ? '저장된 작업이에요. 다시 복사해도 새 작업이 생기지 않아요. 같이 간 사람은 지금도 바꿀 수 있어요.'
+    ? `저장된 작업이에요 (${Math.max(0, Math.round((Date.now() - cur.created) / 60000))}분 전). 같은 고객에게 다시 복사해도 새 작업이 안 생겨요. 새 고객이면 꼭 아래 "다음 작업 시작"부터!`
     : '문자를 처음 복사하는 순간 저장돼요. 여러 번 복사해도 작업은 1개예요.';
   $('jobcard').classList.toggle('saved', cur.saved);
 }
@@ -110,6 +110,22 @@ function render() {
   $('reviewText').value = cur.reviewEdited ? (cur.reviewText || fill(messages.review, { '링크': reviewLink() })) : fill(messages.review, { '링크': reviewLink() });
   $('copyAccount').classList.remove('done'); $('copyReview').classList.remove('done');
   $('acctNote').textContent = (cfg.settings || {}).account ? '' : '계좌가 아직 없어요 — 알려주시면 설정에 넣어둘게요';
+}
+
+// 이미 저장된 작업을 오래 지나서 또 복사하면 = 다음 고객에게 같은 링크를 보낼 위험 → 한 번 묻기
+const OLD_MIN = 90;
+function okToReuse() {
+  if (!cur.saved) return true;
+  const min = Math.round((Date.now() - cur.created) / 60000);
+  if (min < OLD_MIN) return true;
+  const ago = min < 120 ? min + '분' : Math.round(min / 60) + '시간';
+  if (confirm(`이 문자는 ${ago} 전에 만든 "${cur.name}" 작업 거예요.
+
+같은 고객에게 다시 보내는 거면 [확인]
+새 고객이면 [취소] 후 맨 아래 "다음 작업 시작"을 먼저 눌러주세요.`)) return true;
+  document.getElementById('nextJob').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('nextJob').classList.add('pulse');
+  return false;
 }
 
 function ensureSaved() {
@@ -203,9 +219,11 @@ async function main() {
   $('reviewText').addEventListener('input', () => { cur.reviewEdited = true; cur.reviewText = $('reviewText').value; saveCur(); });
 
   $('copyAccount').addEventListener('click', async () => {
+    if (!okToReuse()) return;
     if (await copyText($('accountText').value)) { ensureSaved(); toast('✔ ② 계좌 문자 복사됨'); $('copyAccount').classList.add('done'); }
   });
   $('copyReview').addEventListener('click', async () => {
+    if (!okToReuse()) return;
     if (!cur.saved) { cur.created = Date.now(); cur.reviewEdited = false; saveCur(); render(); }   // 링크 시각 = 처음 보내는 순간
     const text = $('reviewText').value;
     if (!text.includes(cur.token)) { cur.reviewEdited = false; saveCur(); render(); return toast('⚠️ 링크 줄이 지워져서 문구를 다시 불러왔어요'); }

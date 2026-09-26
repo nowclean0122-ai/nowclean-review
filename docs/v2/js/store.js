@@ -14,7 +14,16 @@ export async function submit(fields) {
   return true;
 }
 
-export function device() {
+// 기기 표시 + 이 폰만의 짧은 번호(같은 링크를 다른 사람이 열어도 구분하려고). 개인정보 아님
+function devId() {
+  try {
+    let d = localStorage.getItem('nc2_dev');
+    if (!d) { d = Math.random().toString(36).slice(2, 6); localStorage.setItem('nc2_dev', d); }
+    return d;
+  } catch (e) { return 'x'; }
+}
+export function device() { return deviceName() + '#' + devId(); }
+function deviceName() {
   const ua = navigator.userAgent;
   if (/iPhone|iPad/.test(ua)) return 'iPhone';
   if (/SamsungBrowser/.test(ua)) return 'Galaxy(삼성인터넷)';
