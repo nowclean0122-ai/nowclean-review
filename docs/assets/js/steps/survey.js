@@ -38,6 +38,7 @@ export async function render(ctx) {
       return toast(miss.requiredMsg || '표시(*)된 질문을 골라주세요');
     }
     next.disabled = true;
+    ctx.save({ surveyDone: true });
     if (!isPreview) {   // 기다리지 않음
       if (ctx.saveSurvey) ctx.saveSurvey(answers);
       else post({ action: 'survey', j: ctx.j, answers, device: device() }).catch(() => {});
@@ -49,5 +50,7 @@ export async function render(ctx) {
   skip.addEventListener('click', () => { L('survey_skip', 'survey'); ctx.next(); });
 
   L('survey_view', 'survey');
-  return h('section', {}, h('h1', {}, cfg.title), h('p', { class: 'sub' }, '해당하는 것만 톡톡 눌러주세요 · 1분'), blocks, next, skip);
+  // 이미 제출한 사람이 다시 들어오면: 새로 쌓이지 않고 기존 답을 고치는 것임을 알려줌
+  const again = ctx.state.surveyDone ? h('p', { class: 'again' }, '✔ 이미 답해 주셨어요. 고치실 게 있으면 바꾸고 다음을 눌러주세요.') : null;
+  return h('section', {}, h('h1', {}, cfg.title), again, h('p', { class: 'sub' }, '해당하는 것만 톡톡 눌러주세요 · 1분'), blocks, next, skip);
 }

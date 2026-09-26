@@ -60,3 +60,9 @@ select{width:100%;font-size:17px;padding:10px;border:1.5px solid var(--line);bor
 .extra-card{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;margin:18px 0 6px;text-align:center}
 .extra-title{font-weight:700;margin:0 0 6px}
 .extra-done{font-weight:700;color:#15803d;margin:4px 0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.row2 .btn{margin:0;display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1.35;padding:15px 8px;font-size:15.5px}
+.btn.carrot-soft{background:#fff4eb;border-color:var(--carrot);color:#c2410c}
+.row2 .btn.soon{padding:10px 6px;font-size:13.5px}
+.btn.soon small{font-weight:600;font-size:12px}
+.again{background:#e8f6ec;color:#15803d;border-radius:10px;padding:8px 12px;font-size:14px;font-weight:600;margin:6px 0}

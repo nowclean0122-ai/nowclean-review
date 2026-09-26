@@ -10,7 +10,8 @@ export async function render(ctx) {
   const p = h('p', { class: 'thanks-body' });
   p.innerHTML = '바쁘신데 시간 내주셔서<br><b>진심으로 감사드려요.</b><br><br>남겨주신 설문과 후기가<br>저희 같은 작은 업체에<br><b>정말 너무너무 큰 힘</b>이 됩니다.<br><br>새집에서 행복한 일만<br>가득하시길 바랄게요 🏠';
 
-  const extras = (await loadJson('platforms.json')).filter(x => x.placement === 'thanks' && x.enabled && x.url);
+  const pj = await loadJson('platforms.json');
+  const extras = (Array.isArray(pj) ? pj : pj.buttons).filter(x => x.placement === 'thanks' && x.enabled && x.url);
   const cards = extras.map(x => {
     const followed = ctx.state['did_' + x.key];
     const card = h('div', { class: 'extra-card' });
