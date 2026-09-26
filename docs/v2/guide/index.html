@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>나우클린 · 후기 문자 사용법</title>
+<style>body{margin:0;background:#f5f8ff;color:#1f2328;font:15px/1.6 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}main{max-width:1000px;margin:0 auto;padding:14px 12px 60px}</style>
+</head>
+<body><main>
+<style>
+.gd{--ink:#1f2328;--sub:#6b7280;--brand:#1f6feb;--soft:#e8f1ff;--line:#dde6f3;--carrot:#ff6f0f}
+.gd h1{font-size:24px;margin:6px 0 4px}
+.gd .lead{color:var(--sub);font-size:14px;margin:0 0 12px}
+.gd .tabs{display:flex;gap:8px;margin:12px 0;position:sticky;top:0;background:#f5f8ff;padding:8px 0;z-index:5}
+.gd .tabs a{flex:1;text-align:center;padding:10px;border-radius:12px;border:1.5px solid var(--line);background:#fff;text-decoration:none;color:var(--ink);font-weight:700}
+.gd .tabs a.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.gd .sheet{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin:16px 0}
+.gd .sheet h2{margin:0 0 4px;font-size:21px}
+.gd .who{display:inline-block;font-weight:800;padding:3px 12px;border-radius:8px;font-size:13px;margin-bottom:6px}
+.gd .w1{background:#e0f2fe;color:#075985}.gd .w2{background:#fff1e6;color:#c2410c}
+.gd .flowline{font-size:14px;background:var(--soft);border-radius:10px;padding:8px 12px;margin:8px 0}
+.gd .steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px 12px;margin:12px 0}
+.gd .stp{display:flex;flex-direction:column;align-items:center}
+.gd .ph{width:220px;height:410px;border:7px solid #23262d;border-radius:26px;background:#fff;overflow:hidden;position:relative;font-size:11px;line-height:1.4;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.gd .sb{height:16px;font-size:9px;color:#666;padding:2px 10px;display:flex;justify-content:space-between}
+.gd .ab{height:30px;display:flex;align-items:center;gap:6px;padding:0 10px;font-weight:700;font-size:12px;border-bottom:1px solid #eee}
+.gd .ab.brand{background:#fff;color:var(--brand)}
+.gd .ab.dg{background:var(--carrot);color:#fff}
+.gd .ab.bank{background:#eef3ff;color:#1d4ed8}
+.gd .sc{padding:8px 10px;position:relative}
+.gd .cap{margin-top:9px;text-align:center;font-size:14px;max-width:240px}
+.gd .cap .n{display:inline-flex;width:24px;height:24px;border-radius:50%;background:#23262d;color:#fff;font-weight:800;align-items:center;justify-content:center;font-size:13px;margin-right:4px}
+.gd .cap .n.o{background:#9aa3b2}
+.gd .cap small{color:var(--sub);font-size:12px}
+.gd .bt{display:block;text-align:center;border-radius:8px;padding:7px;margin:5px 0;font-weight:700;font-size:11px;border:1px solid #e3e6ec;background:#fff}
+.gd .bt.p{background:var(--brand);color:#fff;border-color:var(--brand)}
+.gd .bt.dg{background:var(--carrot);color:#fff;border-color:var(--carrot)}
+.gd .bt.dgs{background:#fff4eb;color:#c2410c;border-color:var(--carrot)}
+.gd .bt.bl{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+.gd .bt.d{color:#aaa;border-style:dashed;background:#fafafa;font-size:10px}
+.gd .r2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.gd .r2 .bt{margin:0}
+.gd .tap{position:relative;outline:2.5px solid #e11d48;outline-offset:2px;border-radius:8px;animation:gpl 1.4s infinite}
+.gd .tap::after{content:attr(data-n);position:absolute;top:-11px;right:-11px;background:#e11d48;color:#fff;border-radius:50%;width:19px;height:19px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:800;z-index:2}
+@keyframes gpl{0%,100%{box-shadow:0 0 0 0 rgba(225,29,72,.45)}50%{box-shadow:0 0 0 7px rgba(225,29,72,0)}}
+.gd .grid4{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.gd .grid4 div{height:48px;background:#dfe3ea;border-radius:4px;position:relative;font-size:8px;color:#666;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px}
+.gd .grid4 .ht::before{content:"♥";position:absolute;top:2px;right:4px;color:#e11d48;font-size:10px}
+.gd .grid4 .ck::before{content:"✔";position:absolute;top:2px;left:4px;background:#1d4ed8;color:#fff;border-radius:50%;width:13px;height:13px;font-size:8px;display:flex;align-items:center;justify-content:center}
+.gd .bub{max-width:84%;border-radius:12px;padding:6px 8px;margin:5px 0;font-size:10px}
+.gd .bub.me{background:#e8f1ff;margin-left:auto}
+.gd .bub.you{background:#f1f3f6}
+.gd .imgs{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin:4px 0}
+.gd .imgs div{height:38px;background:#dfe3ea;border-radius:5px;font-size:8px;color:#666;display:flex;align-items:center;justify-content:center}
+.gd .inp{position:absolute;left:0;right:0;bottom:0;border-top:1px solid #eee;background:#fff;padding:6px 8px;display:flex;gap:6px;align-items:center}
+.gd .inp .box{flex:1;border:1px solid #ddd;border-radius:14px;height:26px;padding:4px 8px;color:#999;font-size:10px}
+.gd .pop{position:absolute;background:#23262d;color:#fff;border-radius:8px;padding:5px 10px;font-size:10.5px;font-weight:700;z-index:4}
+.gd .fld{border:1px solid #ddd;border-radius:6px;padding:6px 8px;margin:4px 0;font-size:11px;background:#fcfcfc}
+.gd .big{font-size:18px;font-weight:800;text-align:right}
+.gd .chip2{display:inline-block;border:1px solid #e3e6ec;border-radius:99px;padding:2px 7px;margin:2px 1px;font-size:10px;background:#fafafa}
+.gd .chip2.on{background:var(--soft);border-color:var(--brand);color:#1450b8;font-weight:700}
+.gd .chip2.etc{border-style:dashed;color:#888}
+.gd .lbl{font-size:10px;color:#666;margin-top:5px}
+.gd .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:#23262d;color:#fff;border-radius:99px;padding:4px 12px;font-size:10px;white-space:nowrap}
+.gd .card{border:1.5px solid var(--brand);background:var(--soft);border-radius:8px;padding:6px;font-size:10px}
+.gd .okbox{background:#e8f6ec;border-radius:8px;padding:6px;font-size:9.5px;color:#14532d;text-align:center;margin-top:6px}
+.gd .done{position:relative}
+.gd .done::after{content:"✔ 완료";position:absolute;top:-8px;right:4px;background:#15803d;color:#fff;font-size:8px;border-radius:99px;padding:0 5px}
+.gd .say{background:#fffdf4;border:1px dashed #d9c98a;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:14.5px}
+.gd .dont{background:#fdecec;border-radius:10px;padding:10px 14px;margin-top:12px;font-size:14px}
+.gd .faq{background:#e8f1ff;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:14px}
+.gd .faq p{margin:4px 0}
+@media print{.gd .tap{animation:none}.gd .tabs{display:none}.gd .sheet{page-break-after:always;border:none}}
+</style>
+
+<div class="gd">
+<h1>📱 나우클린 후기 문자 사용법</h1>
+<p class="lead"><span style="outline:2.5px solid #e11d48;border-radius:6px;padding:0 6px">빨간 테두리</span> = 누를 곳 · 빨간 숫자 = 누르는 순서 · 회색 번호 = 필요할 때만</p>
+<div class="tabs"><a href="#staff" class="on">🧹 직원용</a><a href="#customer">🏠 고객 화면</a></div>
+
+<!-- ================= 직원 ================= -->
+<section class="sheet" id="staff">
+<span class="who w1">🧹 직원용</span>
+<h2>청소 끝나고 1분</h2>
+<div class="flowline">이름 누르기 → 금액 → 📎 사진 보내기 → 계좌 문자 → 리뷰 문자 → 한마디 → (다음 현장) 다음 작업 시작</div>
+<div class="steps">
+
+<div class="stp"><div class="ph"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="ab">🌐 …github.io/…/v2/admin</div><div class="sc">
+<div style="text-align:center;margin-top:24px;font-weight:700;font-size:13px">관리자 번호</div><div class="fld tap" data-n="1" style="text-align:center;margin-top:8px;font-size:14px">1 1 1 1</div><div class="bt p">들어가기</div>
+<div style="position:absolute;left:10px;right:10px;top:220px;border:1px solid #ddd;border-radius:10px;background:#fff;padding:6px;box-shadow:0 4px 12px rgba(0,0,0,.15)"><div class="lbl" style="margin:2px 0 4px">공유 / ⋮ 메뉴</div><div class="bt">링크 복사</div><div class="bt tap" data-n="2">➕ 홈 화면에 추가</div></div>
+</div></div><div class="cap"><span class="n o">0</span><b>처음 한 번만</b><br><small>번호 1111 → 홈 화면에 추가 (아이폰: 공유 버튼 / 갤럭시: ⋮)</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>13:05</span><span>▮▮▮</span></div><div class="ab">🖼️ 갤러리</div><div class="sc">
+<div class="lbl">오늘 · 전 사진</div><div class="grid4"><div class="ht">후드 전</div><div class="ht">욕실 전</div><div class="ht">창틀 전</div><div class="ht">베란다 전</div><div class="ht">거실 전</div><div>기타</div></div>
+<div style="margin-top:14px;height:120px;background:#dfe3ea;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#666">욕실 전 (크게 보기)</div>
+<div style="display:flex;justify-content:space-around;margin-top:8px;font-size:15px"><span>↗</span><span class="tap" data-n="1" style="padding:0 6px;color:#e11d48">♥</span><span>🗑</span></div>
+</div></div><div class="cap"><span class="n">1</span><b>시작 전·끝난 후 사진 → ♥</b><br><small>같은 자리·같은 방향 · 호수판·우편물 안 나오게</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:42</span><span>▮▮▮</span></div><div class="ab brand">나우클린 관리자</div><div class="sc">
+<div class="card"><div class="lbl" style="margin:0">지금 작업</div><b>새 작업 (아직 저장 전)</b></div>
+<div class="lbl">오늘 같이 간 사람</div>
+<span class="chip2 on tap" data-n="1">김수현</span><span class="chip2 on">박수현</span><span class="chip2">김팀장</span><span class="chip2">김대리</span><span class="chip2">정수현</span><span class="chip2 etc">＋ 기타</span>
+<div class="lbl">잔금 금액 (카드면 비워도 돼요)</div><div class="fld big tap" data-n="2">250,000 원</div>
+</div></div><div class="cap"><span class="n">2</span><b>같이 간 사람 → 금액</b><br><small>없는 이름은 ＋ 기타 · 금액은 계좌 문자에 바로 들어가요</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:43</span><span>▮▮▮</span></div><div class="ab">사진 선택 <span style="margin-left:auto;font-size:10px">4장</span></div><div class="sc">
+<div style="display:flex;gap:6px;margin-bottom:6px"><span class="chip2 on tap" data-n="1">♥ 즐겨찾기</span><span class="chip2">최근</span></div>
+<div class="grid4"><div class="ck">후드 전</div><div class="ck">후드 후</div><div class="ck">욕실 전</div><div class="ck">욕실 후</div><div>창틀 전</div><div>창틀 후</div></div>
+<div class="bt bl tap" data-n="2" style="margin-top:14px">완료 → ➤ 전송</div>
+</div></div><div class="cap"><span class="n">3</span><b>문자 ① 전후 사진</b><br><small>고객 문자방 → 📎 → ♥ 즐겨찾기 4~6장 → 전송</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:43</span><span>▮▮▮</span></div><div class="ab brand">나우클린 관리자</div><div class="sc">
+<div class="lbl">② 계좌 문자 — 고쳐서 보내도 돼요</div>
+<div class="fld" style="font-size:10.5px">3333-25-6770006<br>카카오뱅크 김현재<br>잔금 250,000원</div>
+<div class="bt tap" data-n="1">📋 계좌 문자 복사</div>
+<div class="lbl" style="margin-top:10px">→ 고객 문자방에 길게 눌러 붙여넣기 → 전송</div>
+<div class="toast">✔ ② 계좌 문자 복사됨</div>
+</div></div><div class="cap"><span class="n">4</span><b>문자 ② 계좌</b><br><small>카드 결제면 건너뛰기</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:44</span><span>▮▮▮</span></div><div class="ab brand">나우클린 관리자</div><div class="sc">
+<div class="lbl">③ 리뷰 문자 (링크 줄은 지우지 마세요)</div>
+<div class="fld" style="font-size:9.5px;min-height:110px">[나우클린] 오늘 청소 맡겨주셔서 감사합니다!<br>위 사진은 하나 눌러 '전체 저장'을 해두시면…<br>1분 설문과 짧은 후기 부탁드려요.<br>▶ …/v2/a/?j=…</div>
+<div class="bt p tap" data-n="1">📋 리뷰 문자 복사</div>
+<div class="lbl">→ 같은 문자방에 붙여넣기 → 전송</div>
+</div></div><div class="cap"><span class="n">5</span><b>문자 ③ 리뷰 링크</b><br><small>여러 번 복사해도 작업은 1개예요</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:45</span><span>▮▮▮</span></div><div class="ab">‹ 고객님</div><div class="sc" style="height:350px">
+<div class="bub me"><div class="imgs"><div>후드 전</div><div>후드 후</div><div>욕실 전</div><div>욕실 후</div></div></div>
+<div class="bub me">3333-25-6770006<br>카카오뱅크 김현재<br>잔금 250,000원</div>
+<div class="bub me">[나우클린] 오늘 청소 맡겨주셔서 감사합니다! … ▶ 링크</div>
+<div style="text-align:center;margin-top:8px;font-size:18px">✅</div>
+</div></div><div class="cap"><span class="n">6</span><b>3통 확인 → 고객님께 한마디</b><br><small>아래 "하는 말" 참고</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>19:10</span><span>▮▮▮</span></div><div class="ab brand">나우클린 관리자</div><div class="sc">
+<div class="card"><div class="lbl" style="margin:0">지금 작업 (80분 전)</div><b>김수현·박수현 · 오후 5:42</b></div>
+<div class="lbl" style="margin-top:10px">다음 현장 도착하면 맨 아래에서</div>
+<div class="bt" style="border:2px solid #1f2328;margin-top:6px" data-n="1"><span class="tap" data-n="1" style="display:block;padding:2px">✚ 이 작업 끝 · 다음 작업 시작</span></div>
+<div class="lbl" style="margin-top:12px">최근 작업 · 고객 설문 답이 몇 분 뒤 떠요</div>
+<div class="fld" style="font-size:9.5px"><b>김수현·박수현 · 오후 5:42</b> · 25만<br>지금까지: 감사 화면 · 🥕<br><span style="color:#1450b8">입주 전 · 깨끗 주방 후드, 욕실</span></div>
+</div></div><div class="cap"><span class="n">7</span><b>다음 현장 → 다음 작업 시작</b><br><small>안 누르면 같은 링크가 나가요 (잊으면 알려줘요)</small></div></div>
+
+</div>
+<h3>🗣️ 고객님께 하는 말</h3>
+<div class="say"><b>시작 전</b> "시작 전에 지금 상태 사진 좀 찍어둘게요. 끝나고 전후 사진이랑 계좌 문자로 보내드릴게요."</div>
+<div class="say"><b>문자 보낸 직후</b> "방금 사진이랑 계좌, 설문 링크 보내드렸어요. 사진은 하나 눌러서 <b>전체 저장</b> 해두시면 후기 쓰실 때 같이 올리실 수 있어요. 1분 설문이랑 짧은 후기 남겨주시면 저희 같은 작은 업체한테 정말 큰 힘이 됩니다."</div>
+<div class="dont"><b>✘ 하지 말 것</b> — "별 다섯 개 부탁드려요" · "좋게 써주세요" · "후기 쓰시면 ○○ 드릴게요" · 고객님 폰 받아서 대신 쓰기 · 다 쓸 때까지 서서 기다리기 · 불만 나온 날 후기 얘기</div>
+<div class="faq"><b>❓ 이럴 땐</b>
+<p><b>목록에 방금 작업이 "반영 중"으로 떠요</b> → 정상이에요. 몇 분 뒤 ↻ 새로고침</p>
+<p><b>같이 간 사람을 잘못 눌렀어요</b> → 이름 다시 누르면 바로 고쳐져요 (저장된 뒤에도 돼요)</p>
+<p><b>고객 화면이 궁금해요</b> → 👀 고객 화면 미리보기 (기록 안 남아요)</p>
+<p><b>잘못 만든 작업</b> → 최근 작업에서 🗑</p>
+</div>
+</section>
+
+<!-- ================= 고객 ================= -->
+<section class="sheet" id="customer">
+<span class="who w2">🏠 고객님 화면</span>
+<h2>고객님이 받으시는 것</h2>
+<div class="flowline">문자 3통 → 사진 전체 저장 → (계좌 복사·송금) → 링크 → 설문 → 당근 후기·단골 / 인스타 → 다 했어요</div>
+<div class="steps">
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:45</span><span>▮▮▮</span></div><div class="ab">‹ 나우클린 010-3674-5156</div><div class="sc">
+<div class="bub you"><div class="imgs"><div class="tap" data-n="1">후드 전</div><div>후드 후</div><div>욕실 전</div><div>욕실 후</div></div></div>
+<div class="bub you">3333-25-6770006<br>카카오뱅크 김현재<br>잔금 250,000원</div>
+<div class="bub you">[나우클린] 오늘 청소 맡겨주셔서 감사합니다!…<br>▶ <u>…/v2/a/?j=…</u></div>
+<div class="pop" style="left:22px;top:112px">💾 전체 저장</div>
+</div></div><div class="cap"><span class="n">1</span><b>사진 하나 눌러 → 전체 저장</b><br><small>후기에 같이 올릴 사진</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:47</span><span>▮▮▮</span></div><div class="ab bank">🏦 토스·은행앱</div><div class="sc">
+<div class="bub you tap" data-n="1" style="margin-top:6px">3333-25-6770006<br>카카오뱅크 김현재<br>잔금 250,000원</div>
+<div class="lbl">↑ 길게 눌러 복사</div>
+<div class="fld tap" data-n="2" style="background:#eef3ff;border-color:#1d4ed8;margin-top:10px">📋 복사한 계좌로 보낼까요?<br><b>카카오뱅크 3333-25-6770006</b></div>
+<div class="bt bl" style="margin-top:14px;padding:10px">보내기</div>
+</div></div><div class="cap"><span class="n o">2</span><b>계좌 문자 복사 → 송금</b><br><small>카드로 결제하셨으면 건너뛰기</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:50</span><span>▮▮▮</span></div><div class="ab brand">나우클린 NowClean <span style="margin-left:auto;color:#999;font-weight:400">1/3</span></div><div class="sc">
+<div style="font-weight:800;font-size:13px">오늘 청소 어떠셨어요?</div>
+<div class="lbl">어떤 청소였나요?</div><span class="chip2 on tap" data-n="1">입주 전</span><span class="chip2">이사 나가며</span><span class="chip2">거주 중</span>
+<div class="lbl">특히 깨끗해진 곳 (여러 개)</div><span class="chip2 on">주방 후드</span><span class="chip2 on">욕실 물때</span><span class="chip2">창틀·레일</span><span class="chip2">유리창</span><span class="chip2">…</span>
+<div class="lbl">좋았던 점 (여러 개)</div><span class="chip2 on">꼼꼼한 마무리</span><span class="chip2">친절한 응대</span><span class="chip2">…</span>
+<div class="bt p tap" data-n="2" style="margin-top:8px">다음 →</div>
+<div class="lbl" style="text-align:center">설문 건너뛰기 →</div>
+</div></div><div class="cap"><span class="n o">3</span><b>설문 톡톡 → 다음</b><br><small>1분 · 건너뛰어도 돼요</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:51</span><span>▮▮▮</span></div><div class="ab brand">나우클린 NowClean <span style="margin-left:auto;color:#999;font-weight:400">2/3</span></div><div class="sc">
+<div style="font-weight:800;font-size:13px">짧은 후기 부탁드려요 🙏</div>
+<div class="r2" style="margin-top:8px"><div class="bt dg tap" data-n="1">🥕 당근 후기 남기기</div><div class="bt dgs tap" data-n="2">🥕 당근 단골 맺기</div></div>
+<div class="bt" style="margin-top:6px">📷 인스타 팔로우 + 후기 댓글</div>
+<div class="r2" style="margin-top:6px"><div class="bt d">💬 카카오맵 후기<br>준비 중</div><div class="bt d">N 네이버 예약 리뷰<br>준비 중</div></div>
+<div class="bt" style="margin-top:12px">다 했어요 →</div>
+</div></div><div class="cap"><span class="n o">4</span><b>당근 후기 → 당근 단골</b><br><small>당근이 없으면 인스타도 좋아요</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:53</span><span>▮▮▮</span></div><div class="ab dg">🥕 당근 · 나우클린 후기</div><div class="sc">
+<div style="display:flex;gap:4px;margin:8px 0"><div class="tap" data-n="1" style="width:48px;height:48px;border:1.5px dashed #ff6f0f;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px">📷+</div><div style="width:48px;height:48px;background:#dfe3ea;border-radius:6px;font-size:8px;display:flex;align-items:center;justify-content:center">욕실 후</div></div>
+<div class="fld tap" data-n="2" style="min-height:90px;color:#999">후기를 남겨주세요 (한두 줄)</div>
+<div class="bt dg tap" data-n="3" style="margin-top:16px">등록</div>
+<div class="lbl" style="text-align:center">단순화한 그림 · 실제 화면과 조금 달라요</div>
+</div></div><div class="cap"><span class="n o">5</span><b>사진 추가 → 한두 줄 → 등록</b><br><small>등록하고 돌아오면 됩니다</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:55</span><span>▮▮▮</span></div><div class="ab brand">나우클린 NowClean <span style="margin-left:auto;color:#999;font-weight:400">2/3</span></div><div class="sc">
+<div style="font-weight:800;font-size:13px">짧은 후기 부탁드려요 🙏</div>
+<div class="r2" style="margin-top:10px"><div class="bt dg done">🥕 당근 후기 남기기</div><div class="bt dgs tap" data-n="1">🥕 당근 단골 맺기</div></div>
+<div class="bt" style="margin-top:6px">📷 인스타 팔로우 + 후기 댓글</div>
+<div class="okbox"><b>남겨주셔서 정말 감사합니다 🙏</b><br>다른 곳에도 남겨주시면 더 큰 힘이 돼요.</div>
+<div class="bt tap" data-n="2" style="margin-top:8px">다 했어요 →</div>
+</div></div><div class="cap"><span class="n o">6</span><b>돌아오면 ✔ 완료 + 감사 인사</b><br><small>화면 그대로 → 단골·인스타 이어서 → 다 했어요</small></div></div>
+
+<div class="stp"><div class="ph"><div class="sb"><span>17:56</span><span>▮▮▮</span></div><div class="ab brand">나우클린 NowClean <span style="margin-left:auto;color:#999;font-weight:400">3/3</span></div><div class="sc">
+<div style="font-weight:800;font-size:16px;margin-top:14px;text-align:center">정말 감사합니다 🙏</div>
+<div style="font-size:11px;margin:12px 0;text-align:center;line-height:1.8">남겨주신 설문과 후기는<br><b>저희에게 정말 큰 도움</b>이 됩니다.<br><br>앞으로도 더 꼼꼼하게,<br>믿고 맡기실 수 있도록<br><b>열심히 노력하겠습니다.</b></div>
+<div class="lbl" style="text-align:center">— 나우클린 드림</div>
+</div></div><div class="cap"><span class="n">7</span><b>끝!</b><br><small>링크는 하루 동안 다시 열 수 있어요</small></div></div>
+
+</div>
+<div class="faq"><b>❓</b> 입금 말고는 <b>전부 선택</b>이에요 · 문자는 <b>010-3674-5156</b>에서만 보내요 · 링크를 닫았으면 다시 누르면 하던 곳부터 이어져요</div>
+</section>
+</div>
+</main>
+<script>document.querySelectorAll('.gd .tabs a').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.gd .tabs a').forEach(x=>x.classList.toggle('on',x===a))}));</script>
+</body></html>
