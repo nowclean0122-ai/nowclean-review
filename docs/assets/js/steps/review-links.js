@@ -25,7 +25,7 @@ export async function render(ctx) {
   };
   // 당근·인스타에 다녀오면 화면은 그대로 두고: 그 버튼에 ✔ + 아래에 감사 인사 (다른 버튼도 이어서 누를 수 있게)
   const thanksBox = h('div', { class: 'inline-thanks', hidden: true });
-  thanksBox.innerHTML = '<b>남겨주셔서 정말 감사합니다 🙏</b><br>다른 곳에도 남겨주시면 더 큰 힘이 돼요.<br>다 하셨으면 아래 <b>다 했어요</b>를 눌러주세요.';
+  thanksBox.innerHTML = '<b>남겨주셔서 정말 감사합니다 🙏</b><br>다른 곳에도 남겨주시면 더 큰 힘이 돼요.';
   const onVisible = () => {
     if (document.hidden) { if (clicked) leftAt = Date.now(); return; }
     if (!(clicked && leftAt && Date.now() - leftAt > 2000)) return;   // 2초 넘게 다녀왔으면 하고 온 것으로 봄
