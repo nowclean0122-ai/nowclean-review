@@ -44,6 +44,12 @@ function freshJob() {
   saveCur();
 }
 
+// 폰이 자동 복사를 막으면: 글을 선택해 두고 길게 눌러 복사하라고 안내(조용히 실패하지 않게)
+function copyFail(id) {
+  const t = $(id); t.focus(); t.select(); t.setSelectionRange(0, t.value.length);
+  toast('⚠️ 자동 복사가 막혔어요 — 글을 길게 눌러 [복사] 해주세요');
+}
+
 /* ---------- 지금 고객 ---------- */
 
 function renderCard() {
@@ -177,6 +183,7 @@ async function main() {
   $('copyAccount').addEventListener('click', async () => {
     if (!okToReuse()) return;
     if (await copyText($('accountText').value)) { ensureSaved(); toast('✔ 복사됐어요 — 문자방에 붙여넣고 보내세요'); markStep('s2'); }
+    else copyFail('accountText');
   });
   $('copyReview').addEventListener('click', async () => {
     if (!okToReuse()) return;
@@ -184,6 +191,7 @@ async function main() {
     const text = $('reviewText').value;
     if (!text.includes(cur.token)) { cur.reviewEdited = false; saveCur(); render(); return toast('⚠️ 링크 줄이 지워져서 문구를 다시 불러왔어요'); }
     if (await copyText(text)) { ensureSaved(); toast('✔ 복사됐어요 — 문자방에 붙여넣고 보내세요'); markStep('s3'); }
+    else { ensureSaved(); copyFail('reviewText'); }
   });
   $('preview').addEventListener('click', () => {
     if (!cur.saved) return toast('문자를 한 번 복사해서 저장한 뒤에 볼 수 있어요');
@@ -198,4 +206,4 @@ async function main() {
   if (!cfg.formAction) $('loginMsg').textContent = '⚠️ 설정(구글 설문지 연결)이 아직 안 됐어요';
   if (localStorage.getItem('nc2_in')) enter();
 }
-main();
+main().catch(() => { document.body.insertAdjacentHTML('afterbegin', '<p style="background:#fff3cd;padding:12px;margin:0">⚠️ 인터넷 연결이 약해서 못 불러왔어요. <a href="" onclick="location.reload();return false">다시 시도</a></p>'); });

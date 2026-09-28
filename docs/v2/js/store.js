@@ -1,7 +1,15 @@
 // v2 저장소: 쓰기 = 구글 설문지에 제출, 읽기 = 시트 "공개" 탭(웹에 게시 CSV)
 // 외부에 열린 구글 스크립트 주소가 없어서 이번 같은 차단 구조를 피한다.
 let cfgP = null;
-export const config = () => cfgP || (cfgP = fetch(new URL('../config.json', import.meta.url), { cache: 'no-store' }).then(r => r.json()));
+// 폰 인터넷이 잠깐 끊겨도 한 번 더 받아보고, 실패하면 다음 호출 때 다시 시도(실패 결과를 붙잡고 있지 않음)
+export const getJson = async url => {
+  for (let i = 0; ; i++) {
+    try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) return await r.json(); if (i >= 2) throw new Error('HTTP ' + r.status); }
+    catch (e) { if (i >= 2) throw e; }
+    await new Promise(r => setTimeout(r, 800 * (i + 1)));
+  }
+};
+export const config = () => cfgP || (cfgP = getJson(new URL('../config.json', import.meta.url)).catch(e => { cfgP = null; throw e; }));
 
 export async function submit(fields) {
   const c = await config();
